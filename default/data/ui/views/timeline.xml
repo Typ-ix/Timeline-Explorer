@@ -1,6 +1,6 @@
 <!-- <form version="1.1" script="custom_table.js,DrillToFilter.js"> -->
 <form version="1.1" script="custom_table.js,profile_manager.js" theme="light">
-  <label>Timeline</label>
+  <label>Timeline and Search</label>
   <description></description>
   <init>
     <set token="drillfi_filters_spl"></set>

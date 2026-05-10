@@ -367,50 +367,50 @@ require([
         '<option value="ends">Ends with</option>'
     ].join('');
 
-    var $toolbar = $(
-        '<div id="dtf-toolbar">' +
-          /* ── Filter dropdown (left) ── */
-          '<div class="dtf-dropdown" id="dtf-filter-dd">' +
-            '<button class="dtf-btn dtf-btn-outline" id="dtf-filter-btn">&#9776; Filter</button>' +
-            '<div class="dtf-dropdown-menu" id="dtf-filter-menu">' +
-              '<div class="dtf-dropdown-item danger" data-dtf-action="clear">&#x2715; Clear all filters</div>' +
-              '<div class="dtf-dropdown-sep"></div>' +
-              '<div class="dtf-dropdown-item manage" id="dtf-manage-filters-link">&#9965; Manage filters&hellip;</div>' +
-              '<div class="dtf-dropdown-sep"></div>' +
-              '<div class="dtf-dropdown-section">Saved filters</div>' +
-              '<div id="dtf-saved-list"></div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="dtf-sep"></div>' +
-          /* ── Add inline ── */
-          '<div class="dtf-inline-wrapper">' +
-            '<button class="dtf-btn dtf-btn-primary" id="dtf-add-btn">+ Add filter</button>' +
-            '<div id="dtf-inline-form">' +
-              '<input type="text" class="dtf-input" id="dtf-inline-field" placeholder="Field" />' +
-              '<select class="dtf-select" id="dtf-inline-op">' + OP_OPTIONS + '</select>' +
-              '<input type="text" class="dtf-input" id="dtf-inline-value" placeholder="Value" />' +
-              '<button class="dtf-btn dtf-btn-confirm" id="dtf-inline-ok">OK</button>' +
-              '<button class="dtf-btn dtf-btn-cancel" id="dtf-inline-cancel">&#x2715;</button>' +
-            '</div>' +
-          '</div>' +
-          '<div class="dtf-sep"></div>' +
-          /* ── Save ── */
-          '<button class="dtf-btn dtf-btn-save" id="dtf-save-btn" disabled>&#128190; Save filter</button>' +
-          /* ── Active filter chips ── */
-          '<div id="dtf-chips"></div>' +
-          /* ── Spacer pushes Manage Profiles to the far right ── */
-          '<div style="flex:1;"></div>' +
-          /* ── Manage Profiles (right) ── */
-          '<button class="dtf-btn dtf-btn-outline" id="dtf-manage-profiles-btn">&#128203; Manage Profiles</button>' +
-        '</div>'
-    );
+    // var $toolbar = $(
+    //     '<div id="dtf-toolbar">' +
+    //       /* ── Filter dropdown (left) ── */
+    //       '<div class="dtf-dropdown" id="dtf-filter-dd">' +
+    //         '<button class="dtf-btn dtf-btn-outline" id="dtf-filter-btn">&#9776; Filter</button>' +
+    //         '<div class="dtf-dropdown-menu" id="dtf-filter-menu">' +
+    //           '<div class="dtf-dropdown-item danger" data-dtf-action="clear">&#x2715; Clear all filters</div>' +
+    //           '<div class="dtf-dropdown-sep"></div>' +
+    //           '<div class="dtf-dropdown-item manage" id="dtf-manage-filters-link">&#9965; Manage filters&hellip;</div>' +
+    //           '<div class="dtf-dropdown-sep"></div>' +
+    //           '<div class="dtf-dropdown-section">Saved filters</div>' +
+    //           '<div id="dtf-saved-list"></div>' +
+    //         '</div>' +
+    //       '</div>' +
+    //       '<div class="dtf-sep"></div>' +
+    //       /* ── Add inline ── */
+    //       '<div class="dtf-inline-wrapper">' +
+    //         '<button class="dtf-btn dtf-btn-primary" id="dtf-add-btn">+ Add filter</button>' +
+    //         '<div id="dtf-inline-form">' +
+    //           '<input type="text" class="dtf-input" id="dtf-inline-field" placeholder="Field" />' +
+    //           '<select class="dtf-select" id="dtf-inline-op">' + OP_OPTIONS + '</select>' +
+    //           '<input type="text" class="dtf-input" id="dtf-inline-value" placeholder="Value" />' +
+    //           '<button class="dtf-btn dtf-btn-confirm" id="dtf-inline-ok">OK</button>' +
+    //           '<button class="dtf-btn dtf-btn-cancel" id="dtf-inline-cancel">&#x2715;</button>' +
+    //         '</div>' +
+    //       '</div>' +
+    //       '<div class="dtf-sep"></div>' +
+    //       /* ── Save ── */
+    //       '<button class="dtf-btn dtf-btn-save" id="dtf-save-btn" disabled>&#128190; Save filter</button>' +
+    //       /* ── Active filter chips ── */
+    //       '<div id="dtf-chips"></div>' +
+    //       /* ── Spacer pushes Manage Profiles to the far right ── */
+    //       '<div style="flex:1;"></div>' +
+    //       /* ── Manage Profiles (right) ── */
+    //       '<button class="dtf-btn dtf-btn-outline" id="dtf-manage-profiles-btn">&#128203; Manage Profiles</button>' +
+    //     '</div>'
+    // );
 
     var $target = $('.dashboard-row').first();
-    if ($target.length) {
-        $target.before($toolbar);
-    } else {
-        $('.main-section-body').prepend($toolbar);
-    }
+    // if ($target.length) {
+    //     $target.before($toolbar);
+    // } else {
+    //     $('.main-section-body').prepend($toolbar);
+    // }
 
     // =========================================================================
     // MODALS HTML
@@ -1656,5 +1656,335 @@ require([
         console.log('target:', e.target);
         console.log('classes:', $(e.target).attr('class'));
         console.log('closest drilldown:', $(e.target).closest('[class*="drill"]'));
+    });
+});
+
+require([
+    'underscore',
+    'jquery',
+    'splunkjs/mvc',
+    'splunkjs/mvc/searchmanager',
+    'splunkjs/mvc/simplexml/ready!'
+], function(_, $, mvc, SearchManager) {
+
+    // ---------------------------------------------------------------------
+    // Manual / existing flag-event add handler
+    // ---------------------------------------------------------------------
+    var tokens_default   = mvc.Components.get('default');
+    var tokens_submitted = mvc.Components.get('submitted');
+
+    var $btn    = $('#flag-save-btn');
+    var $status = $('#flag-status-msg');
+    var isBusy  = false;
+
+    var FORM_FIELDS = [
+        'flag_id',
+        'flag_description',
+        'flag_manual_host',
+        'flag_manual_source',
+        'flag_manual_time'
+    ];
+
+    FORM_FIELDS.forEach(function(t) {
+        tokens_default.unset(t);
+        tokens_default.unset('form.' + t);
+        tokens_submitted.unset(t);
+        tokens_submitted.unset('form.' + t);
+    });
+
+    function getToken(name) {
+        return tokens_submitted.get(name)
+            || tokens_default.get(name)
+            || tokens_default.get('form.' + name)
+            || '';
+    }
+
+    function setStatus(msg, kind) {
+        var color = kind === 'ok'   ? '#28a745'
+                  : kind === 'err'  ? '#dc3545'
+                  : kind === 'info' ? '#6c757d'
+                  : '';
+        $status.text(msg).css('color', color);
+
+        if (kind === 'ok') {
+            setTimeout(function() {
+                if ($status.text() === msg) {
+                    $status.text('');
+                }
+            }, 7000);
+        }
+    }
+
+    function clearForm() {
+        FORM_FIELDS.forEach(function(t) {
+            tokens_default.unset(t);
+            tokens_default.unset('form.' + t);
+            tokens_submitted.unset(t);
+            tokens_submitted.unset('form.' + t);
+        });
+    }
+
+    function uuidv4() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random() * 16 | 0;
+            var v = c === 'x' ? r : (r & 0x3) | 0x8;
+            return v.toString(16);
+        });
+    }
+
+    var UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+    function escSplString(s) {
+        return String(s)
+            .replace(/\\/g, '\\\\')
+            .replace(/"/g, '\\"')
+            .replace(/\r/g, '\\r')
+            .replace(/\n/g, '\\n');
+    }
+
+    function isConcreteIndex(idx) {
+        return idx
+            && idx.indexOf('*') === -1
+            && idx.indexOf(',') === -1
+            && idx.indexOf(' ') === -1;
+    }
+
+    function isValidManualTime(t) {
+        return (
+            /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(t)  ||
+            /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(t)  ||
+            /^\d{2}\/\d{2}\/\d{4}:\d{2}:\d{2}:\d{2}$/.test(t)
+        );
+    }
+
+    function runSearch(searchIdPrefix, spl, onDone, onFail) {
+        var sm = new SearchManager({
+            id: searchIdPrefix + '_' + Date.now() + '_' + Math.floor(Math.random() * 100000),
+            search: spl,
+            preview: false,
+            autostart: true,
+            cache: false
+        });
+
+        sm.on('search:done', function() {
+            if (onDone) onDone();
+        });
+
+        sm.on('search:fail', function() {
+            if (onFail) onFail('Search failed — check Splunk logs');
+        });
+
+        sm.on('search:error', function(props) {
+            var msg = props && props.message ? props.message : 'Unknown Splunk search error';
+            if (onFail) onFail(msg);
+        });
+    }
+    function resolveAndSave(id, added_by, description, mitre, status, onSuccess, onFail) {
+        // Always emit exactly one row with usable found/resolved_idx fields,
+        // even when tstats matches nothing.
+        var resolveSpl = '| tstats count as found WHERE index=* uid="' + escSplString(id) + '" BY index '
+                    + '| stats sum(found) as found, latest(index) as resolved_idx '
+                    + '| appendpipe [stats count | eval found=0, resolved_idx="" | fields found resolved_idx] '
+                    + '| stats max(found) as found, max(resolved_idx) as resolved_idx';
+
+        var smId = 'resolve_uid_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+        var sm = new SearchManager({
+            id: smId,
+            search: resolveSpl,
+            earliest_time: '0',
+            latest_time: 'now',
+            preview: false,
+            autostart: true
+        });
+
+        var results = sm.data('results', { output_mode: 'json', count: 1 });
+        var settled = false;
+        function settle(fn) { if (settled) return; settled = true; fn(); }
+
+        function processResults() {
+            var data = results.data();
+            if (!data || !data.results) return false;
+
+            settle(function() {
+                var row = data.results[0] || {};
+                var found = parseInt(row.found, 10) || 0;
+                var resolvedIdx = row.resolved_idx;
+
+                if (found === 0 || !resolvedIdx) {
+                    onFail('UID ' + id.substring(0, 8) + '… not found in any accessible index');
+                    return;
+                }
+
+                var lookupSpl = buildLookupSaveSpl(id, resolvedIdx, added_by, description, mitre, status);
+                runSearch('flag_lookup_save', lookupSpl, function() { onSuccess(resolvedIdx); }, onFail);
+            });
+            return true;
+        }
+
+        results.on('data',   processResults);
+        sm.on('search:done', processResults);
+
+        function maybeFail(msg) {
+            setTimeout(function() {
+                if (settled) return;
+                if (processResults()) return;
+                settle(function() { onFail(msg); });
+            }, 200);
+        }
+
+        sm.on('search:fail',  function()      { maybeFail('UID resolution search failed (job ' + smId + ')'); });
+        sm.on('search:error', function(props) { maybeFail((props && props.message) || 'Unknown error during UID resolution'); });
+    }
+
+    function buildLookupSaveSpl(id, idx, added_by, description, mitre, status) {
+        return '| makeresults '
+            + '| eval id="'           + escSplString(id)          + '" '
+            + '| eval flag=1 '
+            + '| eval added_by="'     + escSplString(added_by)    + '" '
+            + '| eval added_when=now() '
+            + '| eval idx="'          + escSplString(idx)         + '" '
+            + '| eval description="'  + escSplString(description) + '" '
+            + '| eval mitre_tactic="' + escSplString(mitre)       + '" '
+            + '| eval status="'       + escSplString(status)      + '" '
+            + '| append [ | inputlookup flagged_events ] '
+            + '| stats latest(flag) as flag '
+            +         'latest(added_by) as added_by '
+            +         'latest(added_when) as added_when '
+            +         'latest(idx) as idx '
+            +         'latest(description) as description '
+            +         'latest(mitre_tactic) as mitre_tactic '
+            +         'latest(status) as status '
+            +   'by id '
+            + '| outputlookup flagged_events';
+    }
+
+    function buildManualCollectSpl(id, idx, manualHost, manualSource, manualTime,
+                                   added_by, description, mitre, status) {
+        var rawObj = {
+            uid: id,
+            manual_entry: true,
+            description: description,
+            mitre_tactic: mitre,
+            status: status,
+            added_by: added_by
+        };
+        var rawJson = JSON.stringify(rawObj);
+
+        return '| makeresults '
+            + '| eval manual_time="' + escSplString(manualTime) + '" '
+            + '| eval _time=coalesce('
+            +     'strptime(manual_time, "%Y-%m-%d %H:%M:%S"),'
+            +     'strptime(manual_time, "%Y-%m-%dT%H:%M:%S"),'
+            +     'strptime(manual_time, "%m/%d/%Y:%H:%M:%S")'
+            +   ') '
+            + '| where isnotnull(_time) '
+            + '| eval uid="'  + escSplString(id)      + '" '
+            + '| eval _raw="' + escSplString(rawJson) + '" '
+            + '| fields _time _raw uid '
+            + '| collect '
+            +     'index="'      + escSplString(idx)          + '" '
+            +     'host="'       + escSplString(manualHost)   + '" '
+            +     'source="'     + escSplString(manualSource) + '" '
+            +     'sourcetype="osir:manual:timeline" '
+            +     'marker="uid=\\"' + escSplString(id) + '\\""';
+    }
+
+    $btn.on('click', function(e) {
+        e.preventDefault();
+        if (isBusy) return;
+
+        var idx         = getToken('db_index').trim();
+        var description = getToken('flag_description').trim();
+        var added_by    = getToken('flag_added_by').trim();
+        var mitre       = getToken('flag_mitre').trim()  || 'FIXME';
+        var status      = getToken('flag_status').trim() || 'FIXME';
+        var isManual    = getToken('flag_manual') === '1';
+
+        if (!idx) {
+            setStatus('Index is required', 'err');
+            return;
+        }
+
+        var id;
+        var manualHost, manualSource, manualTime;
+
+        if (isManual) {
+            // collect needs a concrete index — wildcards / lists won't work
+            if (!isConcreteIndex(idx)) {
+                setStatus('Manual insert requires a concrete index, not "' + idx + '"', 'err');
+                return;
+            }
+
+            manualHost   = getToken('flag_manual_host').trim();
+            manualSource = getToken('flag_manual_source').trim();
+            manualTime   = getToken('flag_manual_time').trim();
+
+            if (!manualHost)   { setStatus('Manual host is required', 'err');   return; }
+            if (!manualSource) { setStatus('Manual source is required', 'err'); return; }
+            if (!manualTime)   { setStatus('Manual _time is required', 'err');  return; }
+
+            if (!isValidManualTime(manualTime)) {
+                setStatus('Invalid _time format. Use YYYY-MM-DD HH:MM:SS or MM/DD/YYYY:HH:MM:SS', 'err');
+                return;
+            }
+
+            id = 'manual:' + uuidv4();
+        } else {
+            id = getToken('flag_id').trim();
+            if (!UUID_RE.test(id)) {
+                setStatus('Event ID does not look like a UUID', 'err');
+                return;
+            }
+        }
+
+        isBusy = true;
+        $btn.prop('disabled', true);
+        setStatus('Saving…', 'info');
+
+        function fail(msg) {
+            isBusy = false;
+            $btn.prop('disabled', false);
+            setStatus('✗ ' + msg, 'err');
+        }
+
+        function finishSuccess(message) {
+            isBusy = false;
+            $btn.prop('disabled', false);
+            setStatus(message, 'ok');
+            clearForm();
+
+            // Refresh the Flagged events panel
+            var ts = String(Date.now());
+            tokens_default.set('flagged_refresh_ts', ts);
+            tokens_submitted.set('flagged_refresh_ts', ts);
+        }
+
+        var lookupSpl = buildLookupSaveSpl(id, idx, added_by, description, mitre, status);
+
+        if (isManual) {
+            var collectSpl = buildManualCollectSpl(
+                id, idx,
+                manualHost, manualSource, manualTime,
+                added_by, description, mitre, status
+            );
+
+            // 1) write the synthetic event into the chosen index
+            // 2) save the flag in the lookup
+            runSearch('manual_collect', collectSpl, function() {
+                runSearch('flag_lookup_save', lookupSpl, function() {
+                    finishSuccess(
+                        '✓ Event ' + id + ' added to index "' + idx + '" and flagged'
+                    );
+                }, fail);
+            }, fail);
+        } else {
+            setStatus('Resolving UID…', 'info');
+            resolveAndSave(id, added_by, description, mitre, status,
+                function(resolvedIdx) {
+                    finishSuccess('✓ Flag added for ' + id.substring(0, 8) + '… in index "' + resolvedIdx + '"');
+                },
+                fail
+            );
+        }
     });
 });
