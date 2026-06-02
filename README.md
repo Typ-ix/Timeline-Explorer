@@ -32,13 +32,3 @@ This application has been tested exclusively on Docker-based Splunk 9.X instance
 
 For a seamless experience, we recommend using the **full OSIR installation**, which handles the setup of this application on Docker Splunk instances automatically.
 
-## Basic Exemples
-
-Timeline analysis features
-
-![Demo](https://youtu.be/BMCD0gz0ojE)
-
-Flag event in the search
-
-![Demo](https://youtu.be/V7rgbpWxky0)
-
