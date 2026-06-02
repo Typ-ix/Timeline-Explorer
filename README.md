@@ -36,8 +36,11 @@ For a seamless experience, we recommend using the **full OSIR installation**, wh
 
 Timeline analysis features
 
-![Demo](./video/timeline_explorer_features.mp4)
+
+
+
+![Demo](https://github.com/user-attachments/assets/3f0f8052-e64a-435c-b83f-912d9c24e6e8)
 
 Flag event in the search
 
-![Demo](./video/timeline_explorer_search.mp4)
+![Demo](https://github.com/user-attachments/assets/c8c88b26-61d7-4e64-b147-27e870a71dea)
