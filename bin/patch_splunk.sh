@@ -20,7 +20,7 @@ CSS_FILES=(
 # Create the JS patch
 PATCH_JS=$(mktemp /tmp/patch_XXXXXX.js)
 cat > "$PATCH_JS" << 'EOF'
-
+# PATCHED v1.0.0
 let autoExpandPropertyName = 'jsonAutoExpand';
 let autoExpandSetting = localStorage.getItem(autoExpandPropertyName);
 let observer2Added = false;
@@ -190,13 +190,13 @@ $(document).ready(function() {
                     $row.find('.flag-badge-wrap').remove();
                     $row.removeClass('lookup-match-row');
 
-                    var $flagBtn = $('<button class="flag-btn" title="Flag this event">🚩 Flag this event</button>');
+                    var $flagBtn = $('<button class="flag-btn" title="Flag">🚩 Flag</button>');
                     $flagBtn.on('click', function(e) {
                         e.stopPropagation();
                         e.preventDefault();
                         showFlagModal(uid, $row);
                     });
-                    $row.find('td.event').first().prepend($flagBtn);
+                    $row.find('a.toggle-raw-json').first().after($flagBtn);
                 }
             });
         });
@@ -321,8 +321,7 @@ $(document).ready(function() {
                         $row.find('.flag-btn').remove();
                         var descDisplay = desc || 'No description';
                         var $wrap2 = $('<span class="flag-badge-wrap"></span>');
-                        $wrap2.append('<span class="lookup-badge lookup-badge-in">🚩 Flagged by ' + addedBy + ' | ' + descDisplay + ' 🚩</span>');
-                        var $ub = $('<button class="unflag-btn" title="Remove flag">✕ Unflag</button>');
+                        var $ub = $('<button class="unflag-btn" title="Remove flag">🏳️ Unflag</button>');
                         (function(u, r) {
                             $ub.on('click', function(e) {
                                 e.stopPropagation();
@@ -330,8 +329,12 @@ $(document).ready(function() {
                                 unflagEvent(u, r);
                             });
                         })(uid, $row);
+
                         $wrap2.append($ub);
-                        $row.find('td.event').first().prepend($wrap2);
+                        $wrap2.append('<span class="separator"> | </span>');
+                        $wrap2.append('<span class="lookup-badge lookup-badge-in">Flagged by ' + addedBy + ' | ' + descDisplay + '</span>');
+
+                        $row.find('a.toggle-raw-json').first().after($wrap2);
                         $row.addClass('lookup-match-row');
                     }
 
@@ -387,14 +390,13 @@ $(document).ready(function() {
             const uid = getUidFromRow($row);
             const meta = uid && lookupUids.get(uid);
 
-            const $targetCell = $row.find('td.event').first();
+            const $targetCell = $row.find('a.toggle-raw-json').first();
 
             if (meta) {
-                const addedBy = meta.added_by    || 'Unknown';
-                const desc    = meta.description || 'No description';
+                const addedBy = meta.added_by || 'Unknown';
+                const desc = meta.description || 'No description';
                 var $wrap = $('<span class="flag-badge-wrap"></span>');
-                $wrap.append('<span class="lookup-badge lookup-badge-in">🚩 Flagged by ' + addedBy + ' | ' + desc + ' 🚩</span>');
-                var $unflagBtn = $('<button class="unflag-btn" title="Remove flag">✕ Unflag</button>');
+                var $unflagBtn = $('<button class="unflag-btn" title="Remove flag">🏳️ Unflag</button>');
                 (function(capturedUid, capturedRow) {
                     $unflagBtn.on('click', function(e) {
                         e.stopPropagation();
@@ -402,17 +404,21 @@ $(document).ready(function() {
                         unflagEvent(capturedUid, capturedRow);
                     });
                 })(uid, $row);
+
                 $wrap.append($unflagBtn);
-                $targetCell.prepend($wrap);
+                $wrap.append('<span class="separator"> | </span>');
+                $wrap.append('<span class="lookup-badge lookup-badge-in">Flagged by ' + addedBy + ' | ' + desc + '</span>');
+
+                $targetCell.after($wrap);
                 $row.addClass('lookup-match-row');
             } else if (uid) {
-                var $flagBtn = $('<button class="flag-btn" title="Flag this event">🚩 Flag this event</button>');
+                var $flagBtn = $('<button class="flag-btn" title="Flag">🚩 Flag</button>');
                 $flagBtn.on('click', function(e) {
                     e.stopPropagation();
                     e.preventDefault();
                     showFlagModal(uid, $row);
                 });
-                $targetCell.prepend($flagBtn);
+                $targetCell.after($flagBtn);
             }
         });
     }
@@ -492,8 +498,6 @@ EOF
 # Create the CSS patch
 PATCH_CSS=$(mktemp /tmp/patch_XXXXXX.css)
 cat > "$PATCH_CSS" << 'EOF'
-
-/* The switch - the box around the slider*/
 .autoexpand {
     margin-top: 2px;
 }
@@ -555,7 +559,6 @@ input:checked + .slider:before {
 .slider.round:before {
     border-radius: 50%;
 }
-
 /* ── Lookup Badge base ── */
 .lookup-badge {
     display: inline-flex;
@@ -569,7 +572,11 @@ input:checked + .slider:before {
     vertical-align: middle;
     white-space: nowrap;
     letter-spacing: 0.3px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    cursor: pointer;
+    background: transparent;
+    color: #006297;
+    border: 1px solid #006297;
+    box-shadow: none;
     transition: opacity 0.2s;
 }
 
@@ -579,16 +586,16 @@ input:checked + .slider:before {
 
 /* ── In Lookup — vert ── */
 .lookup-badge-in {
-    background: linear-gradient(135deg, #2ecc71, #27ae60);
-    color: #fff;
-    border: 1px solid rgba(39, 174, 96, 0.4);
+    background: transparent;
+    color: #2ecc71;
+    border: 1px solid #2ecc71;
 }
 
 /* ── Not in Lookup — grey ── */
 .lookup-badge-out {
-    background: linear-gradient(135deg, #7f8c8d, #636e72);
-    color: #fff;
-    border: 1px solid rgba(99, 110, 114, 0.4);
+    background: transparent;
+    color: #7f8c8d;
+    border: 1px solid #7f8c8d;
 }
 
 /* ── Row highlight ── */
@@ -596,7 +603,6 @@ input:checked + .slider:before {
     background-color: rgba(46, 204, 113, 0.06) !important;
 }
 
-/* ── Flag event button ── */
 .flag-btn {
     display: inline-flex;
     align-items: center;
@@ -605,17 +611,17 @@ input:checked + .slider:before {
     font-weight: 600;
     padding: 2px 8px;
     border-radius: 12px;
-    margin-right: 8px;
     vertical-align: middle;
     white-space: nowrap;
     cursor: pointer;
-    background: linear-gradient(135deg, #e67e22, #d35400);
-    color: #fff;
-    border: 1px solid rgba(211, 84, 0, 0.4);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    background: transparent;
+    color: #006297;
+    border: 1px solid #006297;
+    box-shadow: none;
     transition: opacity 0.2s;
     letter-spacing: 0.3px;
 }
+
 .flag-btn:hover {
     opacity: 0.85;
 }
@@ -630,26 +636,41 @@ input:checked + .slider:before {
 }
 
 /* ── Unflag button ── */
+
 .unflag-btn {
     display: inline-flex;
     align-items: center;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 600;
-    padding: 1px 7px;
-    border-radius: 10px;
+    padding: 2px 8px;
+    border-radius: 12px;
     cursor: pointer;
-    background: #fff;
+    background: transparent;
     color: #c0392b;
     border: 1px solid #c0392b;
     transition: background 0.15s, color 0.15s;
     white-space: nowrap;
     line-height: 1.5;
     vertical-align: middle;
+    letter-spacing: 0.3px;
 }
 .unflag-btn:hover {
     background: #c0392b;
     color: #fff;
 }
+.separator {
+    color: #006297;
+    margin: 0 6px;
+    font-weight: 200;
+}
+
+a.toggle-raw-json::after {
+    content: "|";
+    color: #006297;
+    margin: 0 6px;
+    font-weight: 200;
+}
+
 
 EOF
 
