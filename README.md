@@ -32,7 +32,12 @@ This application has been tested exclusively on Docker-based Splunk 9.X instance
 
 For a seamless experience, we recommend using the **full OSIR installation**, which handles the setup of this application on Docker Splunk instances automatically.
 
-## Videos
+## Basic Exemples
 
-- [Timeline Explorer Features](./video/timeline_explorer_features.mp4)
-- [Timeline Explorer Search](./video/timeline_explorer_search.mp4)
+Timeline analysis features
+
+![Demo](./video/timeline_explorer_features.mp4)
+
+Flag event in the search
+
+![Demo](./video/timeline_explorer_search.mp4)
