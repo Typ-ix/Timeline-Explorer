@@ -31,8 +31,3 @@ Ensure all events in your Splunk instance contain a `uid` field.
 This application has been tested exclusively on Docker-based Splunk 9.X instances. Compatibility with other versions is not guaranteed. To adapt it to different Splunk versions, you must correct the paths in `patch_splunk.sh`.
 
 For a seamless experience, we recommend using the **full OSIR installation**, which handles the setup of this application on Docker Splunk instances automatically.
-
-## Videos
-
-- [Timeline Explorer Features](./video/timeline_explorer_features.mp4)
-- [Timeline Explorer Search](./video/timeline_explorer_search.mp4)
