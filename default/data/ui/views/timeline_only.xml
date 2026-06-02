@@ -1,0 +1,291 @@
+<!-- <form version="1.1" script="custom_table.js,DrillToFilter.js"> -->
+<form version="1.1" script="custom_table.js" theme="light">
+  <label>Timeline only</label>
+  <description></description>
+  <init>
+    <set token="drillfi_filters_spl"></set>
+    <set token="dtf_filter_query"></set>
+    <set token="show_uid_field">1</set>
+    <unset token="show_manual_fields"></unset>
+    <unset token="execute_save"></unset>
+  </init>
+  <fieldset submitButton="false">
+    <input type="text" token="time_start" searchWhenChanged="true">
+      <label>time_start</label>
+      <default>12/25/1990:14:00:00</default>
+    </input>
+    <input type="text" token="time_end" searchWhenChanged="true">
+      <label>time_end</label>
+      <default>12/25/2030:14:00:00</default>
+    </input>
+    <input type="dropdown" token="db_index" searchWhenChanged="true">
+      <label>Index</label>
+      <fieldForLabel>index</fieldForLabel>
+      <fieldForValue>index</fieldForValue>
+      <search>
+        <query>| eventcount summarize=false 
+| table index 
+| sort index</query>
+      </search>
+    </input>
+    <input type="dropdown" token="host" searchWhenChanged="true">
+      <label>host</label>
+      <fieldForLabel>host</fieldForLabel>
+      <fieldForValue>host</fieldForValue>
+      <choice value="*">All hosts</choice>
+      <search>
+        <query>| tstats dc(source) as source_count where index=$db_index$ by host
+| search source_count &gt;= 2
+| table host</query>
+      </search>
+      <initialValue>*</initialValue>
+    </input>
+    <input type="text" token="search_global" searchWhenChanged="true">
+      <label>Description</label>
+      <default>.*</default>
+    </input>
+    <input type="dropdown" token="flag_mitre_filtre">
+      <label>MITRE tactic</label>
+      <choice value="Reconnaissance">Reconnaissance</choice>
+      <choice value="Resource Development">Resource Development</choice>
+      <choice value="Initial Access">Initial Access</choice>
+      <choice value="Execution">Execution</choice>
+      <choice value="Persistence">Persistence</choice>
+      <choice value="Privilege Escalation">Privilege Escalation</choice>
+      <choice value="Defense Evasion">Defense Evasion</choice>
+      <choice value="Credential Access">Credential Access</choice>
+      <choice value="Discovery">Discovery</choice>
+      <choice value="Lateral Movement">Lateral Movement</choice>
+      <choice value="Collection">Collection</choice>
+      <choice value="Command and Control">Command and Control</choice>
+      <choice value="Exfiltration">Exfiltration</choice>
+      <choice value="Impact">Impact</choice>
+      <choice value="*">All tactics</choice>
+      <initialValue>*</initialValue>
+    </input>
+    <input type="link" token="flagged_refresh">
+      <label></label>
+      <choice value="refresh">🔄 Refresh</choice>
+      <change>
+        <condition value="refresh">
+          <eval token="flagged_refresh_ts">now()</eval>
+          <unset token="form.flagged_refresh"></unset>
+        </condition>
+      </change>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Flag selected event</title>
+      <input type="radio" token="flag_manual" searchWhenChanged="true">
+        <label>Event exists in Splunk?</label>
+        <choice value="0">Yes (UID required)</choice>
+        <choice value="1">No (manual entry)</choice>
+        <default>0</default>
+        <initialValue>0</initialValue>
+        <change>
+          <condition value="1">
+            <set token="show_manual_fields">1</set>
+            <unset token="show_uid_field"></unset>
+          </condition>
+          <condition value="0">
+            <unset token="show_manual_fields"></unset>
+            <set token="show_uid_field">1</set>
+          </condition>
+        </change>
+      </input>
+      <input type="text" token="flag_id" depends="$show_uid_field$">
+        <label>Event ID (UID field)</label>
+      </input>
+      <input type="text" token="flag_manual_host" depends="$show_manual_fields$">
+        <label>Enter host value</label>
+        <default></default>
+      </input>
+      <input type="text" token="flag_manual_source" depends="$show_manual_fields$">
+        <label>Enter source value</label>
+        <default></default>
+      </input>
+      <input type="text" token="flag_manual_time" depends="$show_manual_fields$">
+        <label>Enter _time value (MM/DD/YYYY:HH:MM:SS)</label>
+        <default></default>
+      </input>
+      <input type="text" token="flag_added_by">
+        <label>Added by</label>
+        <default>$env:user$</default>
+      </input>
+      <input type="text" token="flag_description">
+        <label>Description</label>
+        <default></default>
+      </input>
+      <input type="dropdown" token="flag_mitre">
+        <label>MITRE tactic</label>
+        <choice value="Reconnaissance">Reconnaissance</choice>
+        <choice value="Resource Development">Resource Development</choice>
+        <choice value="Initial Access">Initial Access</choice>
+        <choice value="Execution">Execution</choice>
+        <choice value="Persistence">Persistence</choice>
+        <choice value="Privilege Escalation">Privilege Escalation</choice>
+        <choice value="Defense Evasion">Defense Evasion</choice>
+        <choice value="Credential Access">Credential Access</choice>
+        <choice value="Discovery">Discovery</choice>
+        <choice value="Lateral Movement">Lateral Movement</choice>
+        <choice value="Collection">Collection</choice>
+        <choice value="Command and Control">Command and Control</choice>
+        <choice value="Exfiltration">Exfiltration</choice>
+        <choice value="Impact">Impact</choice>
+        <choice value="FIXME">FIXME</choice>
+        <default>FIXME</default>
+      </input>
+      <input type="dropdown" token="flag_status">
+        <label>Status</label>
+        <choice value="Suspicious">Suspicious</choice>
+        <choice value="Under Investigation">Under Investigation</choice>
+        <choice value="Malicious">Malicious</choice>
+        <choice value="Benign">Benign</choice>
+        <choice value="False Positive">False Positive</choice>
+        <default>FIXME</default>
+      </input>
+      <html>
+    <div id="flag-controls" style="margin-top:10px; padding:10px;">
+      <button id="flag-save-btn" class="btn btn-primary">💾 Add flag</button>
+      <span id="flag-status-msg" style="margin-left:12px; font-weight:500;"/>
+    </div>
+  </html>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Events</title>
+      <table id="expand_with_events" depends="$show_table_all$">
+        <search>db_source<query>index=$db_index$ source=$db_source$ host=$host$ earliest="$time_start$" latest="$time_end$" *$search_global$* $dtf_filter_query$
+| where $custom_filters$
+<!-- | eval Flag = _bkt."|"._cd."|".host."|".index."|".source."|"._time -->
+| eval Flag = uid
+| lookup flagged_events id AS Flag OUTPUTNEW flag AS lookup_match 
+| eval Flag = if(lookup_match="1", Flag."|1", Flag."|0") 
+| where match(Flag, ".*\|"."$flagged$". "$")
+| eval _time = strftime(_time, "%F %T.%3N") 
+| table Flag _time $field1 $selected_fields$
+| sort _time
+`remove_null_column`</query>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">100</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <drilldown>
+          <condition field="Flag">
+            <eval token="event_to_add">substr($click.value$, 1, len($click.value$) - 2)</eval>
+          </condition>
+          <condition>
+            <unset token="event_to_add"></unset>
+          </condition>
+        </drilldown>
+      </table>
+    </panel>
+    <panel>
+      <title>Flag event</title>
+      <table id="toggle" depends="$foo$">
+        <search>
+          <query>| inputlookup flagged_events
+          | append [stats count | eval id = "$event_to_add$" | eval flag = 0 | fields - count]
+          <!-- | stats max(flag) as flag by id -->
+          <!-- | stats max(flag) as flag, values(added_by) as added_by, values(added_when) as added_when, values(idx) as idx by id -->
+          | stats max(flag) as flag, latest(added_by) as added_by, latest(added_when) as added_when, latest(idx) as idx, latest(description) as description, latest(mitre_tactic) as mitre_tactic, latest(status) as status by id
+          | eval added_by = if(id="$event_to_add$" AND flag=0, "$current_user$", added_by)
+          <!-- | eval added_by = if(id="$event_to_add$" AND flag=0, "test_user", added_by) -->
+          | eval added_when = if(id="$event_to_add$" AND flag=0, now(), added_when)
+          | eval idx = if(id="$event_to_add$" AND flag=0, "$db_index$", idx)
+          | eval flag = if(id="$event_to_add$", 1-flag, flag)
+          | where flag=1
+          | outputlookup flagged_events</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Flagged events</title>
+      <input type="multiselect" token="show_index" searchWhenChanged="true">
+        <label>Select index</label>
+        <fieldForLabel>index</fieldForLabel>
+        <fieldForValue>index</fieldForValue>
+        <default>$db_index$</default>
+        <search>
+          <query>| eventcount summarize=false 
+  | table index 
+  | sort index</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+      </input>
+      <table id="expand_with_events_flagged">
+        <search>
+          <!-- <query>| inputlookup flagged_events 
+| table id
+| eval metadataParts = split(id, "|")
+| eval bkt = mvindex(metadataParts, 0),
+       cd = mvindex(metadataParts, 1),
+       host = mvindex(metadataParts, 2),
+       index = mvindex(metadataParts, 3),
+       source = mvindex(metadataParts, 4),
+       _time = mvindex(metadataParts, 5)
+| eval timeMinusOne = tonumber(_time) - 1,
+       timePlusOne = tonumber(_time) + 1
+| table bkt, cd, host, index, source, timeMinusOne, timePlusOne, id
+| map  search="| search index=\"$$index$$\" source=\"$$source$$\" host=\"$$host$$\" earliest=$$timeMinusOne$$ latest=$$timePlusOne$$ | where _bkt=\"$$bkt$$\" AND _cd=\"$$cd$$\""
+| eval Flag = _bkt."|"._cd."|".host."|".index."|".source."|"._time."|1"
+| eval _time = strftime(_time, "%F %T.%3N") 
+| table Flag _time $field1$
+`remove_null_column`</query> -->
+          <query>``` refresh:$flagged_refresh_ts$ ```
+index IN ($show_index$) host=$host$ earliest="$time_start$" latest="$time_end$"
+    [| inputlookup flagged_events where flag=1
+    | search idx IN ($show_index$)
+    | rename id AS uid
+    | fields uid
+    | format]
+| eval Flag = uid."|1"
+| lookup flagged_events id AS uid OUTPUTNEW added_by, added_when, description, mitre_tactic, status
+| eval added_when = strftime(added_when, "%d/%m/%Y %H:%M:%S")
+| eval _time = strftime(_time, "%F %T.%3N")
+| where match(description, "(?i)$search_global$")
+| search mitre_tactic="$flag_mitre_filtre$"
+| table Flag _time host source added_by, added_when, mitre_tactic, status, description
+| sort _time
+`remove_null_column`</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="count">30</option>
+        <option name="drilldown">cell</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Update event metadata</title>
+      <table id="update_metadata" depends="$foo$">
+        <search>
+          <query>| inputlookup flagged_events
+    | eval description = if(id="$edit_event_id$", "$edit_description$", description)
+    | eval mitre_tactic = if(id="$edit_event_id$", "$edit_mitre_tactic$", mitre_tactic)
+    | eval status = if(id="$edit_event_id$", "$edit_status$", status)
+    | outputlookup flagged_events</query>
+          <done>
+            <unset token="edit_event_id"></unset>
+            <unset token="edit_description"></unset>
+            <unset token="edit_mitre_tactic"></unset>
+            <unset token="edit_status"></unset>
+          </done>
+        </search>
+      </table>
+    </panel>
+  </row>
+</form>

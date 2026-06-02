@@ -1,6 +1,8 @@
 <nav search_view="search" color="#2B2BA1">
   <view name="search" default='true' />
   <view name="timeline" />
+  <view name="timeline_only" />
+  <view name="osir-dfir" />
   <view name="datasets" />
   <view name="reports" />
   <a href="https://github.com/maxspl/OSIR">Timeline Explorer on Github</a>

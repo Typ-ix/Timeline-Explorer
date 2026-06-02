@@ -1,16 +1,50 @@
-<form version="1.1" script="custom_table.js,DrillToFilter.js">
-  <label>Timeline</label>
+<!-- <form version="1.1" script="custom_table.js,DrillToFilter.js"> -->
+<form version="1.1" script="custom_table.js,profile_manager.js" theme="light">
+  <label>Timeline and Search</label>
   <description></description>
   <init>
     <set token="drillfi_filters_spl"></set>
+    <set token="dtf_filter_query"></set>
+    <unset token="execute_save"></unset>
   </init>
-  <fieldset submitButton="false">
+  <!-- Old "Save profile" row removed — profile_manager.js handles create/rename/delete -->
+  <!-- 
+  <row depends="$execute_save$">
+    <panel>
+      <title>Save profile</title>
+      <table>
+        <search>
+          <query>
+            | inputlookup custom_field_profiles.csv
+            | append [| makeresults | eval profile_name="$new_profile_name$", field_list="$selected_fields$"]
+            | search profile_name!=""
+            | stats last(field_list) as field_list by profile_name
+            | outputlookup custom_field_profiles.csv
+          </query>
+          <done>
+            <unset token="execute_save"></unset>
+            <unset token="form.save_trigger"></unset>
+            <unset token="form.new_profile_name"></unset>
+          </done>
+        </search>
+      </table>
+    </panel>
+  </row> -->
+  <fieldset submitButton="true">
     <input type="time" token="field3">
-      <label></label>
+      <label>time picker</label>
       <default>
         <earliest>-24h@h</earliest>
         <latest>now</latest>
       </default>
+    </input>
+    <input type="text" token="time_start" searchWhenChanged="true">
+      <label>time_start</label>
+      <default>12/25/1990:14:00:00</default>
+    </input>
+    <input type="text" token="time_end" searchWhenChanged="true">
+      <label>time_end</label>
+      <default>12/25/2030:14:00:00</default>
     </input>
     <input type="dropdown" token="db_index">
       <label>Index</label>
@@ -20,7 +54,7 @@
         <query>| rest /services/data/indexes | table title</query>
       </search>
     </input>
-    <input type="dropdown" token="db_source">
+    <input type="dropdown" token="db_source" depends="$show_table_all$">
       <label>Source</label>
       <fieldForLabel>source</fieldForLabel>
       <fieldForValue>source</fieldForValue>
@@ -29,11 +63,34 @@
 | table source</query>
       </search>
     </input>
-    <input type="multiselect" token="field1">
-      <label>Profile</label>
-      <choice value="source description">generic</choice>
+    <input type="dropdown" token="host">
+      <label>host</label>
+      <fieldForLabel>host</fieldForLabel>
+      <fieldForValue>host</fieldForValue>
+      <choice value="*">All hosts</choice>
+      <search>
+        <query>| tstats count where index=$db_index$ by host
+| table host</query>
+      </search>
     </input>
-    <input type="radio" token="flagged">
+    <input type="dropdown" token="field1" id="field1" depends="$show_table_all$">
+      <label>Load Profile</label>
+      <choice value="">None</choice>
+      <fieldForLabel>profile_name</fieldForLabel>
+      <fieldForValue>field_list</fieldForValue>
+      <search>
+        <query>
+          | inputlookup custom_field_profiles.csv 
+          | stats last(field_list) as field_list by profile_name 
+          | table profile_name field_list
+        </query>
+      </search>
+      <change>
+        <set token="profile_sets_fields">1</set>
+        <set token="form.selected_fields">$value$</set>
+      </change>
+    </input>
+    <input type="radio" token="flagged" searchWhenChanged="false">
       <label>Show Only Flagged Events?</label>
       <choice value="1">Yes</choice>
       <choice value="*">No</choice>
@@ -43,31 +100,162 @@
         <condition value="1">
           <set token="show_table_flag">true</set>
           <unset token="show_table_all"></unset>
+          <unset token="show_global_search_all_sources"></unset>
+          <unset token="Source_selected"></unset>
         </condition>
         <condition value="*">
           <set token="show_table_all">true</set>
           <unset token="show_table_flag"></unset>
+          <unset token="show_global_search_all_sources"></unset>
+          <unset token="Source_selected"></unset>
         </condition>
       </change>
     </input>
-    <input type="text" token="field2">
-      <label>Search</label>
+    <input type="radio" token="all_sources">
+      <label>Show all sources?</label>
+      <choice value="1">Yes</choice>
+      <choice value="0">No</choice>
+      <default>0</default>
+      <initialValue>0</initialValue>
+      <change>
+        <condition value="1">
+          <set token="show_global_search_all_sources">true</set>
+          <unset token="show_table_all"></unset>
+          <unset token="show_table_flag"></unset>
+        </condition>
+        <condition value="0">
+          <set token="show_table_all">true</set>
+          <unset token="show_table_flag"></unset>
+          <unset token="show_global_search_all_sources"></unset>
+          <unset token="Source_selected"></unset>
+        </condition>
+      </change>
+    </input>
+    <input type="text" token="search_global" searchWhenChanged="true">
+      <label>Global Regex Search</label>
+      <default>.*</default>
+    </input>
+    <input type="text" token="custom_filters" searchWhenChanged="false">
+      <label>Fields specific search</label>
+      <default>match(_raw, ".*")</default>
+    </input>
+    <input type="multiselect" token="selected_fields" searchWhenChanged="true" depends="$show_table_all$">
+      <label>Field Picker</label>
+      <delimiter>, </delimiter>
+      <search>
+        <query>
+        index=$db_index$ source=$db_source$
+        | transpose 0 
+        | table column 
+        | search NOT column IN ("_set_v", "_si", "_indextime", "_confstr", "_serial", "_sourcetype")
+      </query>
+        <earliest>0</earliest>
+        <latest></latest>
+      </search>
+      <fieldForLabel>column</fieldForLabel>
+      <fieldForValue>column</fieldForValue>
+      <default>_time, _raw</default>
+      <change>
+        <!-- If profile is setting fields, consume the flag and do nothing -->
+        <condition match="$profile_sets_fields$==1">
+          <unset token="profile_sets_fields"></unset>
+        </condition>
+        <!-- Otherwise it's a user change: reset Load Profile to None -->
+        <condition>
+          <set token="form.field1"></set>
+        </condition>
+      </change>
     </input>
   </fieldset>
   <row>
-    <panel>
-      <table id="expand_with_events" depends="$show_table_all$">
+    <panel depends="$show_global_search_all_sources$">
+      <title>Global Search - all sources</title>
+      <table id="global_search_sources">
         <search>
-          <query>index=$db_index$ source=$db_source$ $drillfi_filters_spl$ 
-| head 10000
-| eval Flag = _bkt."|"._cd."|".host."|".index."|".source."|"._time
-| lookup apps.csv title AS Flag OUTPUTNEW export AS lookup_match 
+          <query>index=$db_index$ host=$host$ earliest="$time_start$" latest="$time_end$" *$search_global$*
+| where $custom_filters$
+| stats dc(sourcefile) as nb_sourcefile by host,source
+| sort -nb_sourcefile
+| stats list(source) as Sources, list(nb_sourcefile) as "nb of sourcefile" by host
+| eval switch_view = Sources
+| rename Sources as "Sources (click to show details)"
+| rename switch_view as "click to switch view"
+| table host, "Sources (click to show details)", "nb of sourcefile", "click to switch view"
+          </query>
+          <earliest>0</earliest>
+          <latest></latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <drilldown>
+          <condition field="Sources (click to show details)">
+            <set token="Source_selected">$click.value2$</set>
+            <set token="Host_selected">$click.value$</set>
+          </condition>
+          <condition field="click to switch view">
+            <set token="form.db_source">$click.value2$</set>
+            <set token="form.all_sources">0</set>
+            <set token="show_table_all">true</set>
+            <unset token="show_global_search_all_sources"></unset>
+            <unset token="Source_selected"></unset>
+            <set token="Host_selected">$click.value$</set>
+          </condition>
+          <condition field="*"></condition>
+        </drilldown>
+      </table>
+    </panel>
+    <panel depends="$Source_selected$">
+      <title>Global Search - Matches details</title>
+      <table id="global_search_details">
+        <search>
+          <query>index=$db_index$ host=$Host_selected$ earliest="$time_start$" latest="$time_end$" *$search_global$*
+| where $custom_filters$
+| search source="$Source_selected$"
+| stats count as "hits per sourcefile" by host, source, sourcefile</query>
+          <earliest>0</earliest>
+          <latest></latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <drilldown>
+          <condition field="sourcefile">
+            <link target="_blank">
+              <![CDATA[
+        /app/Timeline-Explorer/search?q=search%20index="$db_index$"%20host="$Host_selected$"%20earliest=$time_start$%20latest=$time_end$%20source="$Source_selected$"%20sourcefile="$click.value2$"%20|%20where%20match(_raw,%20"$search_global$")%20|%20where%20$custom_filters$
+            ]]>
+            </link>
+          </condition>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Events</title>
+      <table id="expand_with_events" depends="$show_table_all$">
+        <search>db_source<query>index=$db_index$ source=$db_source$ host=$host$ earliest="$time_start$" latest="$time_end$" *$search_global$* $dtf_filter_query$
+| where $custom_filters$
+<!-- | eval Flag = _bkt."|"._cd."|".host."|".index."|".source."|"._time -->
+| eval Flag = uid
+| lookup flagged_events id AS Flag OUTPUTNEW flag AS lookup_match 
 | eval Flag = if(lookup_match="1", Flag."|1", Flag."|0") 
 | where match(Flag, ".*\|"."$flagged$". "$")
 | eval _time = strftime(_time, "%F %T.%3N") 
-| table Flag _time $field1$ 
+| table Flag _time $field1$ $selected_fields$
 | sort _time
-| `remove_fields`</query>
+`remove_null_column`</query>
           <earliest>$field3.earliest$</earliest>
           <latest>$field3.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -91,25 +279,36 @@
       </table>
     </panel>
     <panel>
+      <title>Flag event</title>
       <table id="toggle" depends="$foo$">
         <search>
-          <query>| inputlookup apps.csv
-          | append [stats count | eval title = "$event_to_add$" | eval export = 0 | fields - count]
-          | stats max(export) as export by title
-          | eval export = if(title="$event_to_add$", 1-export, export)
-          | where export=1
-          | outputlookup apps.csv</query>
+          <query>| inputlookup flagged_events
+          | append [stats count | eval id = "$event_to_add$" | eval flag = 0 | fields - count]
+          <!-- | stats max(flag) as flag by id -->
+          <!-- | stats max(flag) as flag, values(added_by) as added_by, values(added_when) as added_when, values(idx) as idx by id -->
+          | stats max(flag) as flag, latest(added_by) as added_by, latest(added_when) as added_when, latest(idx) as idx, latest(description) as description, latest(mitre_tactic) as mitre_tactic, latest(status) as status by id
+          | eval added_by = if(id="$event_to_add$" AND flag=0, "$current_user$", added_by)
+          <!-- | eval added_by = if(id="$event_to_add$" AND flag=0, "test_user", added_by) -->
+          | eval added_when = if(id="$event_to_add$" AND flag=0, now(), added_when)
+          | eval idx = if(id="$event_to_add$" AND flag=0, "$db_index$", idx)
+          | eval flag = if(id="$event_to_add$", 1-flag, flag)
+          | where flag=1
+          | outputlookup flagged_events</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
         </search>
+        <option name="refresh.display">progressbar</option>
       </table>
     </panel>
   </row>
   <row>
     <panel>
+      <title>Flagged events</title>
       <table id="expand_with_events_flagged" depends="$show_table_flag$">
         <search>
-          <query>| inputlookup apps.csv 
-| table title
-| eval metadataParts = split(title, "|")
+          <!-- <query>| inputlookup flagged_events 
+| table id
+| eval metadataParts = split(id, "|")
 | eval bkt = mvindex(metadataParts, 0),
        cd = mvindex(metadataParts, 1),
        host = mvindex(metadataParts, 2),
@@ -118,16 +317,49 @@
        _time = mvindex(metadataParts, 5)
 | eval timeMinusOne = tonumber(_time) - 1,
        timePlusOne = tonumber(_time) + 1
-| table bkt, cd, host, index, source, timeMinusOne, timePlusOne, title
-| map  search="| search index=\"$$index$$\" source=\"$$source$$\" host=\"$$host$$\" earliest=$$timeMinusOne$$ latest=$$timePlusOne$$ | where _bkt=\"$$bkt$$\" AND _cd=\"$$cd$$\"" maxsearches=200
+| table bkt, cd, host, index, source, timeMinusOne, timePlusOne, id
+| map  search="| search index=\"$$index$$\" source=\"$$source$$\" host=\"$$host$$\" earliest=$$timeMinusOne$$ latest=$$timePlusOne$$ | where _bkt=\"$$bkt$$\" AND _cd=\"$$cd$$\""
 | eval Flag = _bkt."|"._cd."|".host."|".index."|".source."|"._time."|1"
 | eval _time = strftime(_time, "%F %T.%3N") 
-| table Flag _time $field1$</query>
+| table Flag _time $field1$
+`remove_null_column`</query> -->
+          <query>index=$db_index$ host=$host$ earliest="$time_start$" latest="$time_end$"
+            [| inputlookup flagged_events where flag=1
+            | search idx="$db_index$"
+            | rename id AS uid
+            | fields uid
+            | format]
+          | eval Flag = uid."|1"
+          | lookup flagged_events id AS uid OUTPUTNEW added_by, added_when, description, mitre_tactic, status
+          | eval added_when = strftime(added_when, "%d/%m/%Y %H:%M:%S")
+          | eval _time = strftime(_time, "%F %T.%3N")
+          | table Flag _time $field1$ host source added_by, added_when, mitre_tactic, status, description
+          | sort _time
+          | where $dtf_filter_query$
+          `remove_null_column`</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>
         <option name="drilldown">cell</option>
         <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Update event metadata</title>
+      <table id="update_metadata" depends="$foo$">
+        <search>
+          <query>| inputlookup flagged_events
+    | eval description = if(id="$edit_event_id$", "$edit_description$", description)
+    | eval mitre_tactic = if(id="$edit_event_id$", "$edit_mitre_tactic$", mitre_tactic)
+    | eval status = if(id="$edit_event_id$", "$edit_status$", status)
+    | outputlookup flagged_events</query>
+          <done>
+            <unset token="edit_event_id"></unset>
+            <unset token="edit_description"></unset>
+            <unset token="edit_mitre_tactic"></unset>
+            <unset token="edit_status"></unset>
+          </done>
+        </search>
       </table>
     </panel>
   </row>

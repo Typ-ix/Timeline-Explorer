@@ -1,0 +1,3 @@
+"_time","filter_name","filters_json"
+1775839736,"Admin Log in","[{""field"":""event.id"",""op"":""eq"",""value"":""4624""},{""field"":""message"",""op"":""contains"",""value"":""Admin""}]"
+1775839736,"Execution svhost","[{""field"":""event.id"",""op"":""eq"",""value"":""4688""},{""field"":""message"",""op"":""contains"",""value"":""svchost""}]"

@@ -1,0 +1,721 @@
+
+<dashboard version="2" theme="light">
+    <label>OSIR - DFIR ORC</label>
+    <description></description>
+    <definition><![CDATA[
+{
+	"title": "OSIR - DFIR ORC",
+	"description": "",
+	"inputs": {
+		"input_0et60Zgz": {
+			"encoding": {
+				"value": "show_all_token"
+			},
+			"options": {
+				"defaultValue": "false",
+				"items": [
+					{
+						"label": "Only show incomplete sources",
+						"value": "false"
+					},
+					{
+						"label": "All sources",
+						"value": "true"
+					}
+				],
+				"token": "show_all_token"
+			},
+			"title": "",
+			"type": "input.dropdown"
+		},
+		"input_UnEH8TIc": {
+			"encoding": {
+				"value": "token_evtx_view"
+			},
+			"options": {
+				"defaultValue": "channel",
+				"items": [
+					{
+						"label": "Show events logs retention per channel",
+						"value": "channel"
+					},
+					{
+						"label": "Focus on key events",
+						"value": "eventid"
+					}
+				],
+				"token": "token_evtx_view"
+			},
+			"title": "",
+			"type": "input.dropdown"
+		},
+		"input_dBmmkZww": {
+			"context": {
+				"formattedConfig": {
+					"number": {
+						"prefix": ""
+					}
+				},
+				"formattedStatics": ">statics | formatByType(formattedConfig)",
+				"label": ">primary | seriesByName(\"index\") | renameSeries(\"label\") | formatByType(formattedConfig)",
+				"statics": [],
+				"value": ">primary | seriesByName(\"index\") | renameSeries(\"value\") | formatByType(formattedConfig)"
+			},
+			"dataSources": {
+				"primary": "ds_Gbyds2zV"
+			},
+			"options": {
+				"items": ">frame(label, value) | prepend(formattedStatics) | objects()",
+				"selectFirstSearchResult": true,
+				"token": "token_index"
+			},
+			"title": "Index",
+			"type": "input.multiselect"
+		},
+		"input_global_trp": {
+			"options": {
+				"defaultValue": "0,",
+				"token": "global_time"
+			},
+			"title": "Global Time Range",
+			"type": "input.timerange"
+		},
+		"input_y9HsgiuH": {
+			"dataSources": {
+				"primary": "ds_Gu71k3rS"
+			},
+			"options": {
+				"clearDefaultOnSelection": true,
+				"defaultValue": [
+					"*"
+				],
+				"items": [
+					{
+						"label": "All",
+						"value": "*"
+					}
+				],
+				"token": "token_host"
+			},
+			"title": "Host",
+			"type": "input.multiselect"
+		}
+	},
+	"defaults": {
+		"dataSources": {
+			"ds.search": {
+				"options": {
+					"queryParameters": {
+						"earliest": "$global_time.earliest$",
+						"latest": "$global_time.latest$"
+					}
+				}
+			}
+		}
+	},
+	"visualizations": {
+		"viz_9R2TsBHt": {
+			"dataSources": {
+				"primary": "ds_RoorvoSH"
+			},
+			"options": {
+				"linkWidth": 0.5,
+				"nodeHeight": 20,
+				"nodeSpacingX": 34,
+				"nodeSpacingY": 3,
+				"resultLimit": 100
+			},
+			"type": "splunk.linkgraph"
+		},
+		"viz_I4ebnetx": {
+			"dataSources": {
+				"primary": "ds_x5iDWP6h"
+			},
+			"options": {
+				"fontSize": "small"
+			},
+			"title": "Windows Event logs retention",
+			"type": "splunk.table"
+		},
+		"viz_N9Yrobip": {
+			"containerOptions": {
+				"visibility": {
+					"hideWhenNoData": true
+				}
+			},
+			"dataSources": {
+				"primary": "ds_PGvqn73F"
+			},
+			"description": "Spot missing DFIR ORC archives or abnormal size",
+			"options": {
+				"fontSize": "small"
+			},
+			"showLastUpdated": false,
+			"showProgressBar": false,
+			"title": "DFIR ORC output overview",
+			"type": "splunk.table"
+		},
+		"viz_OezMAZur": {
+			"containerOptions": {
+				"visibility": {
+					"hideWhenNoData": true
+				}
+			},
+			"dataSources": {
+				"primary": "ds_QjL8ed21"
+			},
+			"title": "DFIR ORC missing files",
+			"type": "splunk.table"
+		},
+		"viz_VbWOw6b0": {
+			"dataSources": {
+				"primary": "ds_1JU7pLW8"
+			},
+			"description": "Domain and local users",
+			"options": {
+				"columnFormat": {
+					"group_name": {
+						"width": 60
+					},
+					"host": {
+						"width": 60
+					},
+					"index": {
+						"width": 60
+					}
+				},
+				"fontSize": "small"
+			},
+			"title": "Windows Users present in local group",
+			"type": "splunk.table"
+		},
+		"viz_b1xfWx3F": {
+			"containerOptions": {
+				"visibility": {
+					"hideWhenNoData": true
+				}
+			},
+			"dataSources": {
+				"primary": "ds_OF61oSTJ"
+			},
+			"description": "Per command detailed view: compare expected artifact with on-disk collection",
+			"options": {
+				"columnFormat": {
+					"Command": {
+						"width": 64
+					},
+					"Expected File": {
+						"width": 94
+					},
+					"member_count": {
+						"width": 60
+					}
+				},
+				"count": 15,
+				"fontSize": "small"
+			},
+			"title": "DFIR ORC Archive Deep Dive",
+			"type": "splunk.table"
+		},
+		"viz_cJ7G5OID": {
+			"dataSources": {
+				"primary": "ds_YmhyTr2N"
+			},
+			"description": "Basic listing of collected archives in OSIR cases",
+			"options": {
+				"fontSize": "small"
+			},
+			"title": "DFIR ORC Collected Archives",
+			"type": "splunk.table"
+		},
+		"viz_cuQkTftH": {
+			"dataSources": {
+				"primary": "ds_ZNl136kr"
+			},
+			"description": "Spot missing events (json2splunk-rs can overload Splunk)",
+			"options": {
+				"count": 25,
+				"fontSize": "small"
+			},
+			"title": "Splunk Ingestion status",
+			"type": "splunk.table"
+		},
+		"viz_hOqT6sle": {
+			"containerOptions": {
+				"visibility": {
+					"hideWhenNoData": true
+				}
+			},
+			"dataSources": {
+				"primary": "ds_FVoV9H3N"
+			},
+			"description": "Per archive detailed view: compare outcome with on-disk archives",
+			"options": {
+				"columnFormat": {
+					"Expected File": {
+						"width": 221
+					},
+					"On Disk": {
+						"width": 94
+					},
+					"Outcome File": {
+						"width": 212
+					},
+					"member_count": {
+						"width": 60
+					}
+				},
+				"count": 30,
+				"fontSize": "small"
+			},
+			"title": "DFIR ORC Archive Validation",
+			"type": "splunk.table"
+		},
+		"viz_mEmmNvx4": {
+			"dataSources": {
+				"primary": "ds_FMZZ27QJ"
+			},
+			"options": {
+				"columnFormat": {
+					"account_class": {
+						"width": 90
+					},
+					"host": {
+						"width": 60
+					},
+					"index": {
+						"width": 60
+					}
+				},
+				"font": "monospace",
+				"fontSize": "small"
+			},
+			"title": "Windows Users Details per host",
+			"type": "splunk.table"
+		},
+		"viz_mMhbGCsF": {
+			"containerOptions": {
+				"visibility": {
+					"hideWhenNoData": true
+				}
+			},
+			"dataSources": {
+				"primary": "ds_wWg0wvzF"
+			},
+			"description": "Are you sure the orc_outcome module has been launched? Verify that the Outcome and Outline are produced by your DFIR ORC configuration.",
+			"options": {
+				"backgroundColor": "#f8d7da",
+				"majorColor": "#721c24",
+				"majorValue": "> primary | seriesByName('message') | lastPoint()"
+			},
+			"title": "ORC Outcome Data Missing",
+			"type": "splunk.singlevalue"
+		},
+		"viz_sMsVfgpM": {
+			"dataSources": {
+				"primary": "ds_Xp5jtgpY"
+			},
+			"description": "Highlights users not present on all systems",
+			"options": {
+				"fontSize": "small"
+			},
+			"title": "Windows Users Overview - Local and Domain",
+			"type": "splunk.table"
+		},
+		"viz_tY8EfUzN": {
+			"containerOptions": {
+				"visibility": {}
+			},
+			"dataSources": {
+				"primary": "ds_AsBFeZmY"
+			},
+			"description": "Data from hives and systeminfo.exe",
+			"options": {
+				"count": 11,
+				"font": "monospace",
+				"fontSize": "small"
+			},
+			"title": "Windows Hosts",
+			"type": "splunk.table"
+		}
+	},
+	"dataSources": {
+		"ds_1JU7pLW8": {
+			"name": "assets_sam_membership",
+			"options": {
+				"query": "index IN ($token_index$) host IN ($token_host$) source=\"windows:hklm\" registry.category=\"User Accounts\" registry.comment=\"Built-in accounts in SAM hive\" registry.value_data=*GroupName*\n| rex field=registry.value_data \"GroupName:\\s+(?<group_name>.+)\"\n| rex field=registry.value_data3 \"Users:\\s+(?<members_raw>.*)\"\n| where isnotnull(members_raw) AND members_raw!=\"\"\n| eval member_sid=split(members_raw, \", \")\n| mvexpand member_sid\n\n| eval well_known=case(\n    member_sid=\"S-1-5-4\",\"Interactive\",\n    member_sid=\"S-1-5-11\",\"Authenticated Users\",\n    member_sid=\"S-1-5-17\",\"IIS APPPOOL Identity\",\n    member_sid=\"S-1-5-18\",\"SYSTEM\",\n    member_sid=\"S-1-5-19\",\"LOCAL SERVICE\",\n    member_sid=\"S-1-5-20\",\"NETWORK SERVICE\",\n    1=1, null()\n)\n\n| join type=left member_sid [\n    search index IN ($token_index$) host IN ($token_host$) source=\"windows:hklm\" registry.category=\"User Accounts\" registry.comment=\"User accounts in SOFTWARE hive\"\n    | rex field=registry.value_data \"KeyName:\\s+(?<member_sid>S-[\\d-]+)\"\n    | rex field=registry.value_data3 \"ProfileImagePath:\\s+.*\\\\\\\\(?<resolved_name>[^\\\\\\\\]+)$\"\n    | stats latest(resolved_name) AS resolved_name by member_sid\n]\n\n| eval resolved_name=if(resolved_name=\"\", null(), resolved_name)\n| rex field=member_sid \"^(?<member_sid_base>S-1-5-21-\\d+-\\d+-\\d+)-(?<rid>\\d+)$\"\n\n| eventstats values(eval(if(match(member_sid,\"S-1-5-21-.*-(50[0-4])$\"), member_sid_base, null()))) AS local_sid_base by index, host\n\n| join type=left host rid [\n    search index IN ($token_index$) host IN ($token_host$) source=\"windows:hklm\" registry.category=\"User Accounts\" registry.comment=\"User accounts in SAM hive\"\n    | rex field=registry.value_data \"Username:\\s+(?<sam_name>\\S+)\\s+Id:\\s+(?<rid>\\d+)\"\n    | eval rid=tostring(rid)\n    | table host sam_name rid\n]\n\n| eval sam_name=if(member_sid_base=local_sid_base, sam_name, null())\n| eval resolved_name=coalesce(resolved_name, sam_name)\n\n| eval member_name=case(\n    isnotnull(well_known), well_known,\n    isnotnull(resolved_name), resolved_name,\n    rid=\"500\", \"Administrator\",\n    rid=\"501\", \"Guest\",\n    rid=\"503\", \"DefaultAccount\",\n    rid=\"504\", \"WDAGUtilityAccount\",\n    rid=\"512\", \"Domain Admins\",\n    rid=\"513\", \"Domain Users\",\n    rid=\"514\", \"Domain Guests\",\n    rid=\"515\", \"Domain Computers\",\n    rid=\"516\", \"Domain Controllers\",\n    rid=\"519\", \"Enterprise Admins\",\n    rid=\"520\", \"Group Policy Creator Owners\",\n    rid<1000 AND isnotnull(rid), \"Built-in (RID \".rid.\")\",\n    1=1, \"not_resolved\"\n)\n\n| eval member_class=case(\n    match(member_sid,\"^S-1-5-\\d+$\"), \"✅\",\n    rid<1000 AND isnotnull(rid), \"✅\",\n    1=1, \"🔴\"\n)\n\n| eval member_display=case(\n    isnotnull(well_known), member_class.\" \".member_name.\" - \".member_sid,\n    isnotnull(rid) AND member_sid_base=local_sid_base, member_class.\" \".member_name.\" - RID \".rid,\n    isnotnull(rid), member_class.\" \".member_name.\" - \".member_sid,\n    1=1, member_class.\" \".member_name.\" - \".member_sid\n)\n\n| eval member_compare=case(\n    isnotnull(well_known), \"WK|\".well_known,\n    isnotnull(rid) AND member_sid_base=local_sid_base AND isnotnull(member_name), \"LOCALRID|\".rid.\"|\".member_name,\n    isnotnull(rid) AND member_sid_base=local_sid_base, \"LOCALRID|\".rid,\n    isnotnull(rid) AND isnotnull(member_name), \"RID|\".rid.\"|\".member_name,\n    isnotnull(rid), \"RID|\".rid,\n    isnotnull(member_name), \"NAME|\".member_name,\n    1=1, \"SID|\".member_sid\n)\n\n| stats\n    values(member_display) AS members\n    values(member_compare) AS members_compare\n    dc(member_sid) AS member_count\n    by index, host, group_name\n\n| eval members_display_sorted=mvsort(members)\n| eval members_compare_sorted=mvsort(members_compare)\n| eval members_signature=mvjoin(members_compare_sorted, \"|\")\n| eval members=mvjoin(members_display_sorted, \"\n\")\n\n| eventstats dc(members_signature) AS _variants by index, group_name\n\n| stats\n    values(host) AS hosts\n    first(members) AS members\n    first(_variants) AS _variants\n    by index, group_name, members_signature\n\n| eval hosts=mvjoin(mvsort(hosts), \"\n\")\n| eval group_display=if(_variants>1, \"⚠️ \".group_name.\" (members differ across hosts)\", group_name)\n\n| fields - members_signature _variants\n| rename group_display AS Group, hosts AS Hosts, members AS Members\n| table index Group Hosts Members\n| sort index Group Hosts",
+				"queryParameters": {
+					"earliest": "0",
+					"latest": ""
+				}
+			},
+			"type": "ds.search"
+		},
+		"ds_AsBFeZmY": {
+			"name": "System_info",
+			"options": {
+				"query": "index IN ($token_index$) host IN ($token_host$) source=\"windows:hklm\" registry.category=\"System Info\"\nregistry.comment IN (\n    \"Current OS name\",\n    \"Current OS installation type\",\n    \"Current OS install time\",\n    \"Current registered organization\",\n    \"Displays the last logged on SAM user\",\n    \"Last system shutdown time\",\n    \"Name of computer used by the user\",\n    \"Specifies the IP addresses of the interface, as configured by Dynamic Host Configuration Protocol (DHCP)\",\n    \"Specifies the Domain Name System (DNS) domain name of the interface, as provided by the Dynamic Host Configuration Protocol (DHCP)\"\n)\n\n| where isnotnull('registry.value_data') AND 'registry.value_data'!=\"\"\n| eval os_name       = if('registry.comment'==\"Current OS name\", 'registry.value_data', null()),\n       os_type       = if('registry.comment'==\"Current OS installation type\", 'registry.value_data', null()),\n       install_date  = if('registry.comment'==\"Current OS install time\", 'registry.value_data', null()),\n       organization  = if('registry.comment'==\"Current registered organization\", 'registry.value_data', null()),\n       last_user     = if('registry.comment'==\"Displays the last logged on SAM user\", 'registry.value_data', null()),\n       last_shutdown = if('registry.comment'==\"Last system shutdown time\", 'registry.value_data', null()),\n       computer_name = if('registry.comment'==\"Name of computer used by the user\", 'registry.value_data', null()),\n       ip_address    = if('registry.comment'==\"Specifies the IP addresses of the interface, as configured by Dynamic Host Configuration Protocol (DHCP)\", 'registry.value_data', null()),\n       dns_domain    = if('registry.comment'==\"Specifies the Domain Name System (DNS) domain name of the interface, as provided by the Dynamic Host Configuration Protocol (DHCP)\", 'registry.value_data', null())\n| stats latest(os_name) as os_name latest(os_type) as os_type latest(install_date) as install_date\n        latest(organization) as organization values(last_user) as last_user max(last_shutdown) as last_shutdown\n        values(computer_name) as computer_name values(ip_address) as ip_address values(dns_domain) as dns_domain\n        by index, host\n\n| append\n    [search index IN ($token_index$) host IN ($token_host$) source=\"windows:live_response:systeminfo\"\n     | rename \"host.name\" as computer_name,\n              \"host.os.name\" as os_name,\n              \"host.domain\" as domain,\n              \"host.Ext.systeminfo.logon_server\" as logon_server,\n              \"host.os.Ext.systeminfo.install_date_raw\" as install_date,\n              \"event.timezone\" as timezone\n     | table index host computer_name os_name domain logon_server install_date timezone]\n     \n| append\n    [search index IN ($token_index$) host IN ($token_host$) source=\"windows:orc_outcome\" event_type=orc_system_network_adapter\n     | where NOT match(friendly_name, \"(?i)(loopback|pseudo|bluetooth|wi-fi direct)\")\n     | eval ip_address = mvfilter(NOT match('addresses{}.ipv4', \"^(127\\.|169\\.254\\.)\"))\n     | where isnotnull(ip_address) AND ip_address!=\"\"\n     | eval dns_domain = 'dns_suffix'\n     | stats values(ip_address) as ip_address values(dns_domain) as dns_domain values(computer_name) as computer_name\n             by index, host]\n\n| stats latest(os_name) as os_name latest(os_type) as os_type latest(install_date) as install_date\n        latest(organization) as organization values(last_user) as last_user max(last_shutdown) as last_shutdown\n        values(computer_name) as computer_name values(ip_address) as ip_address values(dns_domain) as dns_domain\n        values(domain) as domain values(logon_server) as logon_server values(timezone) as timezone\n        by index, host\n\n| eval ip_address    = mvjoin(mvdedup(ip_address), \", \"),\n       dns_domain    = mvjoin(mvdedup(dns_domain), \", \"),\n       computer_name = mvjoin(mvdedup(computer_name), \", \"),\n       last_user     = mvjoin(mvdedup(last_user), \", \")\n| rename host as \"Host\", computer_name as \"Computer Name\", os_name as \"OS\", os_type as \"Type\",\n         install_date as \"Install Date\", organization as \"Org\", last_user as \"Last User\",\n         last_shutdown as \"Last Shutdown\", ip_address as \"IP Addresses\", dns_domain as \"DNS Domain\",\n         domain as \"Domain\", logon_server as \"Logon Server\", timezone as \"Timezone\"\n| table index \"Host\" \"Computer Name\" \"OS\" \"Type\" \"Install Date\" \"IP Addresses\" \n        \"Last User\" \"Last Shutdown\" \"Org\" \"DNS Domain\" \"Domain\" \"Logon Server\" \"Timezone\"",
+				"queryParameters": {
+					"earliest": "0",
+					"latest": ""
+				}
+			},
+			"type": "ds.search"
+		},
+		"ds_FMZZ27QJ": {
+			"name": "asset_users_details",
+			"options": {
+				"query": "index IN ($token_index$) host IN ($token_host$) source=\"windows:hklm\" registry.category=\"User Accounts\" registry.comment=\"User accounts in SAM hive\"\n| rex field=registry.value_data \"Username:\\s+(?<username>\\S+)\\s+Id:\\s+(?<rid>\\d+)\"\n| rex field=registry.value_data2 \"Created:\\s+(?<created>[^\\s]+\\s[^\\s]+)\\s+Last login:\\s+(?<last_login>[^\\s]*\\s?[^\\s]*?)\\s+Last password change\"\n| rex field=registry.value_data3 \"Account flags:\\s+(?<flags>.+)\"\n| eval account_type=if(match(flags,\"AccountDisabled\"),\"Disabled\",if(rid<1000,\"Built-in\",\"Local\"))\n| eval data_source=\"SAM\"\n| table index host username rid account_type created last_login flags data_source\n| append\n    [search index IN ($token_index$) host IN ($token_host$)source=\"windows:hklm\" registry.category=\"User Accounts\" registry.comment=\"User accounts in SOFTWARE hive\"\n    | rex field=registry.value_data \"KeyName:\\s+(?<sid>S-[\\d-]+)\"\n    | rex field=registry.value_data2 \"Timestamp:\\s+(?<profile_timestamp>.+)\"\n    | rex field=registry.value_data3 \"ProfileImagePath:\\s+.*\\\\\\\\(?<username>[^\\\\\\\\]+)$\"\n    | eval data_source=\"SOFTWARE\"\n    | table index host username sid profile_timestamp data_source]\n| append\n    [search index IN ($token_index$) host IN ($token_host$) source=\"windows:hkcu\" registry.comment=\"First Time a User Logs in to a System.\"\n    | rex field=registry.hive \"\\\\\\\\Users\\\\\\\\(?<username>[^\\\\\\\\]+)\\\\\\\\\"\n    | rename registry.value_data AS first_logon\n    | eval data_source=\"HKCU\"\n    | table index host username first_logon data_source]\n| stats latest(rid) AS rid latest(sid) AS sid latest(account_type) AS account_type latest(created) AS created latest(last_login) AS last_login latest(first_logon) AS first_logon latest(profile_timestamp) AS profile_timestamp latest(flags) AS flags values(data_source) AS sources by index host username\n| eval sources=mvjoin(sources, \",\")\n| rex field=sid \"^(?<sid_base>S-1-5-21-\\d+-\\d+-\\d+)-(?<sid_rid>\\d+)$\"\n| rex field=sid \"^(?<sid_base>S-1-5-21-\\d+-\\d+-\\d+)-(?<sid_rid>\\d+)$\"\n| eventstats values(eval(if(isnotnull(rid) AND isnotnull(sid) AND sid_rid=rid, sid_base, null()))) AS local_sid_base by index host\n| eval rid=coalesce(rid, sid_rid)\n| eval origin=case(\n    match(sid,\"^S-1-5-(18|19|20)$\"), \"System\",\n    sid_base=local_sid_base, \"Local\",\n    isnotnull(sid_base), \"Domain\",\n    isnotnull(rid) AND isnull(sid), \"Local (SAM only)\",\n    1=1, \"Unknown\")\n| eval account_class=case(\n    account_type=\"Disabled\", \"⛔ Disabled\",\n    origin=\"System\", \"⚙️ System\",\n    rid<=504, \"✅ Built-in\",\n    origin=\"Domain\", \"🔵 Domain\",\n    1=1, \"🔴 Custom\")\n| table index host  username rid sid  account_type created last_login first_logon profile_timestamp flags sources\n| sort host account_class username",
+				"queryParameters": {
+					"earliest": "0",
+					"latest": ""
+				}
+			},
+			"type": "ds.search"
+		},
+		"ds_FVoV9H3N": {
+			"name": "assets_orc_generated_archives",
+			"options": {
+				"query": "index IN ($token_index$) host IN ($token_host$) source=\"windows:orc_outcome\" event_type=orc_archive_validation\n| eval on_disk = if(physical_archive_exists=\"true\" OR physical_archive_exists=true, \"yes\", \"no\"),\n       size_mb = round(physical_archive_size/1048576, 2),\n       outcome_size_mb = round(outcome_archive_size/1048576, 2),\n       commands = actual_command_count.\"/\".expected_command_count\n| sort computer_name -size_mb\n| rename computer_name as Endpoint,\n         archive_keyword as Archive,\n         expected_archive_name as \"Expected File\",\n         outcome_archive_name as \"Outcome File\",\n         on_disk as \"On Disk\",\n         size_mb as \"Disk Size (MB)\",\n         outcome_size_mb as \"Outcome Size (MB)\",\n         commands as \"Commands (act/exp)\",\n         status as Status\n| table index Endpoint Archive \"Expected File\" \"Outcome File\" \"On Disk\" \"Disk Size (MB)\" \"Outcome Size (MB)\" \"Commands (act/exp)\"",
+				"queryParameters": {
+					"earliest": "0",
+					"latest": ""
+				}
+			},
+			"type": "ds.search"
+		},
+		"ds_Gbyds2zV": {
+			"name": "input_index",
+			"options": {
+				"query": "| eventcount summarize=false \n| table index \n| sort index",
+				"queryParameters": {
+					"earliest": "0",
+					"latest": ""
+				}
+			},
+			"type": "ds.search"
+		},
+		"ds_Gu71k3rS": {
+			"name": "input_host",
+			"options": {
+				"query": "| tstats c where index IN ($token_index$) by host, source \n| stats  dc(source) as source_count by host\n| where source_count >= 2\n| sort host\n| fields host",
+				"queryParameters": {
+					"earliest": "0",
+					"latest": ""
+				}
+			},
+			"type": "ds.search"
+		},
+		"ds_KHARMJrw_ds_AsBFeZmY": {
+			"name": "System_info copy 1",
+			"options": {
+				"query": "index=case_* source=\"windows:hklm\" registry.category=\"System Info\" registry.comment IN (\"Current OS name\", \"Current OS installation type\", \"Current OS install time\", \"Current registered organization\", \"Displays the last logged on SAM user\", \"Last system shutdown time\", \"Name of computer used by the user\", \"Specifies the IP addresses of the interface, as configured by Dynamic Host Configuration Protocol (DHCP)\", \"Specifies the Domain Name System (DNS) domain name of the interface, as provided by the Dynamic Host Configuration Protocol (DHCP)\")\n``` ==== Step 1: filter empties, pivot to columns ====\n```\n| where isnotnull('registry.value_data') AND 'registry.value_data'!=\"\"\n| eval os_name        = if('registry.comment'==\"Current OS name\", 'registry.value_data', null()),\n       os_type        = if('registry.comment'==\"Current OS installation type\", 'registry.value_data', null()),\n       install_date   = if('registry.comment'==\"Current OS install time\", 'registry.value_data', null()),\n       organization   = if('registry.comment'==\"Current registered organization\", 'registry.value_data', null()),\n       last_user      = if('registry.comment'==\"Displays the last logged on SAM user\", 'registry.value_data', null()),\n       last_shutdown  = if('registry.comment'==\"Last system shutdown time\", 'registry.value_data', null()),\n       computer_name  = if('registry.comment'==\"Name of computer used by the user\", 'registry.value_data', null()),\n       ip_address     = if('registry.comment'==\"Specifies the IP addresses of the interface, as configured by Dynamic Host Configuration Protocol (DHCP)\", 'registry.value_data', null()),\n       dns_domain     = if('registry.comment'==\"Specifies the Domain Name System (DNS) domain name of the interface, as provided by the Dynamic Host Configuration Protocol (DHCP)\", 'registry.value_data', null())\n| stats latest(os_name) as os_name latest(os_type) as os_type latest(install_date) as install_date latest(organization) as organization values(last_user) as last_user max(last_shutdown) as last_shutdown values(computer_name) as computer_name values(ip_address) as ip_address values(dns_domain) as dns_domain by host\n```\n==== Step 2: append live_response, normalized to same schema + bonus fields ====\n```\n| append\n    [search index=case_03 source=\"windows:live_response:systeminfo\"\n     | rename \"host.name\" as computer_name, \"host.os.name\" as os_name, \"host.domain\" as domain, \"host.Ext.systeminfo.logon_server\" as logon_server, \"host.os.Ext.systeminfo.install_date_raw\" as install_date, \"event.timezone\" as timezone\n     | table host computer_name os_name domain logon_server install_date timezone]\n```\n==== Step 3: merge both per host — latest() picks live_response when present ====\n```\n| stats latest(os_name) as os_name latest(os_type) as os_type latest(install_date) as install_date latest(organization) as organization values(last_user) as last_user max(last_shutdown) as last_shutdown values(computer_name) as computer_name values(ip_address) as ip_address values(dns_domain) as dns_domain values(domain) as domain values(logon_server) as logon_server values(timezone) as timezone by host\n```\n==== Step 4: clean up for display ====\n```\n| eval ip_address    = mvjoin(mvdedup(ip_address), \", \"),\n       dns_domain    = mvjoin(mvdedup(dns_domain), \", \"),\n       computer_name = mvjoin(mvdedup(computer_name), \", \"),\n       last_user     = mvjoin(mvdedup(last_user), \", \")\n| rename host as \"Host\", computer_name as \"Computer Name\", os_name as \"OS\", os_type as \"Type\", install_date as \"Install Date\", organization as \"Org\", last_user as \"Last User\", last_shutdown as \"Last Shutdown\", ip_address as \"IP Addresses\", dns_domain as \"DNS Domain\", domain as \"Domain\", logon_server as \"Logon Server\", timezone as \"Timezone\"\n| table Host \"Computer Name\" OS Type \"Install Date\" Org \"Last User\" \"Last Shutdown\" \"IP Addresses\" \"DNS Domain\" Domain \"Logon Server\" Timezone"
+			},
+			"type": "ds.search"
+		},
+		"ds_OF61oSTJ": {
+			"name": "assets_orc_artefacts_detail",
+			"options": {
+				"query": "search index IN ($token_index$) host IN ($token_host$) source=\"windows:orc_outcome\" event_type=orc_artifact_evaluation\n| eval collected_on_disk = if(collected_present_on_disk=\"true\" OR collected_present_on_disk=true, \"yes\", \"no\"),\n       in_outcome = if(collected_present_in_outcome=\"true\" OR collected_present_in_outcome=true, \"yes\", \"no\"),\n       disk_size_mb = round(disk_collected_total_size/1048576, 2),\n       max_file_mb = round(disk_collected_max_file_size/1048576, 2),\n       triggered = if(isnotnull(triggered_limits) AND mvcount(triggered_limits)>0, mvjoin(triggered_limits, \", \"), \"none\"),\n       timeout_s = limit_timeout_seconds,\n       max_count = if(isnotnull(limit_max_file_count), limit_max_file_count, \"-\"),\n       max_size = if(isnotnull(limit_max_total_size_bytes), round(limit_max_total_size_bytes/1048576,1).\" MB\", \"-\")\n| sort computer_name -disk_size_mb\n| rename computer_name as Endpoint,\n         archive_keyword as Archive,\n         command_name as Command,\n         collected_on_disk as \"Collected On Disk\",\n         in_outcome as \"In Outcome\",\n         disk_collected_file_count as \"File Count\",\n         disk_size_mb as \"Collected Size (MB)\",\n         max_file_mb as \"Max File (MB)\",\n         observed_duration_seconds as \"Duration (s)\",\n         timeout_s as \"Timeout (s)\",\n         max_count as \"Max Count Limit\",\n         max_size as \"Max Total Size Limit\",\n         triggered as \"Triggered Limits\",\n         status as Status,\n         reason as Reason\n| table index Endpoint Archive Command \"Collected On Disk\" \"In Outcome\" \"File Count\" \"Collected Size (MB)\" \"Max File (MB)\" \"Duration (s)\" \"Timeout (s)\" \"Max Count Limit\" \"Max Total Size Limit\" \"Triggered Limits\" Status Reason",
+				"queryParameters": {
+					"earliest": "0",
+					"latest": ""
+				}
+			},
+			"type": "ds.search"
+		},
+		"ds_PGvqn73F": {
+			"name": "assets_orc_overview",
+			"options": {
+				"query": "index IN ($token_index$) host IN ($token_host$) source=\"windows:orc_outcome\" (\n    event_type=orc_run_summary\n    OR event_type=orc_archive_validation\n    OR event_type=orc_artifact_evaluation\n    OR event_type=orc_system_summary\n)\n| eval archive_on_disk_flag = if(event_type=\"orc_archive_validation\" AND (physical_archive_exists=\"true\" OR physical_archive_exists=true), 1, 0)\n| eval archive_total_flag = if(event_type=\"orc_archive_validation\", 1, 0)\n| eval archive_size_value = if(event_type=\"orc_archive_validation\", physical_archive_size, null())\n| eval missing_flag = if(event_type=\"orc_artifact_evaluation\" AND (collected_present_on_disk=\"false\" OR collected_present_on_disk=false), 1, 0)\n| eval limit_flag = if(event_type=\"orc_artifact_evaluation\" AND isnotnull(triggered_limits) AND mvcount(triggered_limits)>0, 1, 0)\n| eval missing_entry = if(event_type=\"orc_artifact_evaluation\" AND (collected_present_on_disk=\"false\" OR collected_present_on_disk=false), archive_keyword.\" — \".command_name, null())\n| stats\n    values(eval(if(event_type=\"orc_run_summary\", system_type, null()))) as system_type\n    values(eval(if(event_type=\"orc_run_summary\", orc_version, null()))) as orc_version\n    values(eval(if(event_type=\"orc_run_summary\", start, null()))) as start\n    values(eval(if(event_type=\"orc_run_summary\", duration_seconds, null()))) as duration_seconds\n    values(eval(if(event_type=\"orc_run_summary\", expected_archive_count, null()))) as expected_archive_count\n    values(eval(if(event_type=\"orc_run_summary\", status, null()))) as status\n    sum(archive_on_disk_flag) as archives_on_disk\n    sum(archive_total_flag) as archives_total\n    sum(archive_size_value) as total_size_bytes\n    sum(missing_flag) as missing_artifacts\n    sum(limit_flag) as limits_hit\n    list(missing_entry) as missing_details\n    values(eval(if(event_type=\"orc_system_summary\", os_description, null()))) as os_description\n    values(eval(if(event_type=\"orc_system_summary\", architecture, null()))) as architecture\n  by index, computer_name\n| eval Archives = archives_on_disk.\"/\".archives_total,\n       missing_artifacts = coalesce(missing_artifacts, 0),\n       limits_hit = coalesce(limits_hit, 0),\n       missing_details = if(missing_artifacts>0, missing_details, split(\"none\", \",\")),\n       total_size_mb = round(total_size_bytes/1048576, 1),\n       \"Total Size\" = total_size_mb.\" MB\",\n       duration_min = round(duration_seconds/60, 1)\n| rename computer_name as Endpoint,\n         system_type as Type,\n         orc_version as \"ORC Version\",\n         start as \"Collection Start\",\n         duration_min as \"Duration (min)\",\n         os_description as OS,\n         status as Status,\n         missing_artifacts as \"Missing Files\",\n         limits_hit as \"Limits Hit\",\n         missing_details as \"Missing Detail\"\n| table index Endpoint Type OS \"ORC Version\" \"Collection Start\" \"Duration (min)\" Archives \"Total Size\" Status \"Missing Files\" \"Limits Hit\" \"Missing Detail\"",
+				"queryParameters": {
+					"earliest": "0",
+					"latest": ""
+				}
+			},
+			"type": "ds.search"
+		},
+		"ds_QjL8ed21": {
+			"name": "assets_orc_missing_files",
+			"options": {
+				"query": "index IN ($token_index$) host IN ($token_host$) source=\"windows:orc_outcome\" sourcetype=\"_json\" event_type=orc_artifact_evaluation (collected_present_on_disk=\"false\" OR collected_present_on_disk=false)\n| eval disk_size_mb = round(disk_collected_total_size/1048576, 2),\n       in_outcome = if(collected_present_in_outcome=\"true\" OR collected_present_in_outcome=true, \"yes\", \"no\")\n| table index computer_name archive_keyword command_name in_outcome status reason",
+				"queryParameters": {
+					"earliest": "0",
+					"latest": ""
+				}
+			},
+			"type": "ds.search"
+		},
+		"ds_RoorvoSH": {
+			"name": "source_per_host",
+			"options": {
+				"query": "| tstats count as events_number where index IN ($token_index$) host IN ($token_host$) by host source\n| eventstats dc(source) as total_sources by host \n| where total_sources > 3\n| sort host -events_number\n| table host source events_number",
+				"queryParameters": {
+					"earliest": "0",
+					"latest": ""
+				}
+			},
+			"type": "ds.search"
+		},
+		"ds_Xp5jtgpY": {
+			"name": "Windows Users Overview",
+			"options": {
+				"query": "index IN ($token_index$) host IN ($token_host$) source=\"windows:hklm\" registry.category=\"User Accounts\" registry.comment=\"User accounts in SAM hive\"\n| rex field=registry.value_data \"Username:\\s+(?<username>\\S+)\\s+Id:\\s+(?<rid>\\d+)\"\n| eval data_source=\"SAM\"\n| table index host username rid data_source\n| append\n    [search index IN ($token_index$) host IN ($token_host$) source=\"windows:hklm\" registry.category=\"User Accounts\" registry.comment=\"User accounts in SOFTWARE hive\"\n    | rex field=registry.value_data \"KeyName:\\s+(?<sid>S-[\\d-]+)\"\n    | rex field=registry.value_data3 \"ProfileImagePath:\\s+.*\\\\\\\\(?<username>[^\\\\\\\\]+)$\"\n    | eval data_source=\"SOFTWARE\"\n    | table index host username sid data_source]\n| stats latest(rid) AS rid latest(sid) AS sid by index, host, username\n| rex field=sid \"^(?<sid_base>S-1-5-21-\\d+-\\d+-\\d+)-(?<sid_rid>\\d+)$\"\n| eventstats values(eval(if(isnotnull(rid) AND isnotnull(sid) AND sid_rid=rid, sid_base, null()))) AS local_sid_base by index, host\n| eval rid=coalesce(rid, sid_rid)\n| eval origin=case(\n    match(sid,\"^S-1-5-(18|19|20)$\"), \"System\",\n    sid_base=local_sid_base, \"Local\",\n    isnotnull(sid_base), \"Domain\",\n    isnotnull(rid) AND isnull(sid), \"Local (SAM only)\",\n    1=1, \"Unknown\")\n| eventstats dc(host) AS total_hosts\n| eventstats dc(host) AS user_host_count by username, origin\n| eval is_anomaly=if(user_host_count<total_hosts, 1, 0)\n| eval user_display=case(\n    is_anomaly=1 AND origin=\"System\", \"️⚠️ \".username.\" (\".user_host_count.\"/\".total_hosts.\")\",\n    is_anomaly=1 AND (origin=\"Local\" OR origin=\"Local (SAM only)\"), \"⚠️ \".username.\" (\".user_host_count.\"/\".total_hosts.\")\",\n    is_anomaly=1 AND origin=\"Domain\", \"⚠️ \".username.\" (\".user_host_count.\"/\".total_hosts.\")\",\n    origin=\"System\", username,\n    origin=\"Local\" OR origin=\"Local (SAM only)\", username,\n    origin=\"Domain\", username,\n    1=1, \"❓ \".username)\n| stats values(eval(if(origin=\"Local\" OR origin=\"Local (SAM only)\", user_display, null()))) AS local_users values(eval(if(origin=\"Domain\", user_display, null()))) AS domain_users values(eval(if(origin=\"System\", user_display, null()))) AS system_users by index, host\n| eval local_users=mvjoin(local_users, \"\n\")\n| eval domain_users=mvjoin(domain_users, \"\n\")\n| eval system_users=mvjoin(system_users, \"\n\")\n| table index host local_users domain_users system_users",
+				"queryParameters": {
+					"earliest": "0",
+					"latest": ""
+				}
+			},
+			"type": "ds.search"
+		},
+		"ds_YmhyTr2N": {
+			"name": "assets_collect_info",
+			"options": {
+				"query": "search index IN ($token_index$) host IN ($token_host$) source=\"collect:info\"\n| eval size_num=tonumber(size)\n| rex field=name \"^[^_]+_[^_]+_[^_]+_(?<archive_type>[^.]+)\\.7z$\"\n| eval size_human=case(\n    size_num>=1024*1024*1024, tostring(round(size_num/1024/1024/1024, 3)).\" GB\",\n    size_num>=1024*1024, tostring(round(size_num/1024/1024, 3)).\" MB\",\n    size_num>=1024, tostring(round(size_num/1024, 3)).\" KB\",\n    isnotnull(size_num), tostring(size_num).\" B\"\n)\n| eventstats dc(archive_type) as total_archive_type_count values(archive_type) as all_archive_types\n| stats dc(archive_type) as host_archive_type_count\n        first(total_archive_type_count) as total_archive_type_count\n        values(all_archive_types) as all_archive_types\n        values(archive_type) as host_archive_types\n        values(name) as name\n        values(sha1) as sha1\n        values(size_human) as size\n        sum(size_num) as total_size_num\n        by host\n| eval missing_archive_type=mvmap(all_archive_types, if(isnull(mvfind(host_archive_types, \"^\".all_archive_types.\"$\")), all_archive_types, null()))\n| eval total_size=case(\n    total_size_num>=1024*1024*1024, tostring(round(total_size_num/1024/1024/1024, 3)).\" GB\",\n    total_size_num>=1024*1024, tostring(round(total_size_num/1024/1024, 3)).\" MB\",\n    total_size_num>=1024, tostring(round(total_size_num/1024, 3)).\" KB\",\n    isnotnull(total_size_num), tostring(total_size_num).\" B\"\n)\n| eval coverage=host_archive_type_count.\"/\".total_archive_type_count\n| sort 0 host_archive_type_count host\n| table host coverage missing_archive_type name sha1 size total_size",
+				"queryParameters": {
+					"earliest": "0",
+					"latest": ""
+				}
+			},
+			"type": "ds.search"
+		},
+		"ds_ZNl136kr": {
+			"name": "data_sources_script",
+			"options": {
+				"query": "| tstats count WHERE index IN ($token_index$) host IN ($token_host$) by index, host, source, sourcefile\n| where source!=\"json2splunk:ingestion_metadata\"\n| eval actual = count\n| fields - count\n\n| append\n    [ search index IN ($token_index$) host IN ($token_host$) source=\"json2splunk:ingestion_metadata\" event_type=\"ingestion_metadata\"\n    | rename original_source AS source\n             original_sourcefile AS sourcefile\n    | table index host source sourcefile expected_event_count\n    ]\n\n| stats \n    first(actual) AS actual\n    first(expected_event_count) AS expected\n    by index, host, source, sourcefile\n\n| eval expected = tonumber(expected),\n       actual = coalesce(actual, 0),\n       delta = actual - expected,\n       file_ok = if(actual=expected, 1, 0)\n\n| stats \n    sum(expected) AS expected\n    sum(actual) AS actual\n    sum(delta) AS delta\n    sum(file_ok) AS files_ok\n    count AS files_total\n    by index, host, source\n\n| eval status = case(\n    isnull(expected), \"⚠️ No metadata\",\n    actual=expected, \"✅ Complete (\".files_total.\" files)\",\n    actual < expected, \"❌ Missing \".abs(delta).\" events (\".files_ok.\"/\".files_total.\" files OK)\",\n    actual > expected, \"⚠️ Extra \".delta.\" events (\".files_ok.\"/\".files_total.\" files OK)\"\n)\n\n| eval _complete = if(match(status, \"^✅\"), 1, 0)\n| eventstats min(_complete) AS _all_complete\n\n| where \"$show_all_token$\"=\"true\" OR _complete=0 OR _all_complete=1\n\n| eval source = if(_all_complete=1 AND \"$show_all_token$\"=\"false\", \"✅ All sources complete\", source),\n       expected = if(_all_complete=1 AND \"$show_all_token$\"=\"false\", null(), expected),\n       actual = if(_all_complete=1 AND \"$show_all_token$\"=\"false\", null(), actual),\n       delta = if(_all_complete=1 AND \"$show_all_token$\"=\"false\", null(), delta),\n       status = if(_all_complete=1 AND \"$show_all_token$\"=\"false\", null(), status)\n\n| dedup host source\n| fields - _complete, _all_complete, files_ok, files_total\n| sort - expected\n| rename source AS Source\n| table index host Source expected actual delta status",
+				"queryParameters": {
+					"earliest": "0",
+					"latest": ""
+				}
+			},
+			"type": "ds.search"
+		},
+		"ds_wWg0wvzF": {
+			"name": "assets_orc_outcome_present",
+			"options": {
+				"query": "| tstats count WHERE index IN ($token_index$) host IN ($token_host$) source=\"windows:orc_outcome\" \n| where count=0 \n| eval message=\"⚠️ No windows:orc_outcome source found\"",
+				"queryParameters": {
+					"earliest": "0",
+					"latest": ""
+				}
+			},
+			"type": "ds.search"
+		},
+		"ds_x5iDWP6h": {
+			"name": "data_sources_evtx_retention",
+			"options": {
+				"query": "index IN ($token_index$) host IN ($token_host$) source=windows:evtx* NOT event_type=\"ingestion_metadata\"\n [| makeresults\n     | eval eid=\"4688,4698,4697,4657,4663,5140,1,3,10,11,13,22,4104\"\n     | makemv eid delim=\",\"\n     | mvexpand eid\n     | rename eid AS event.id\n     | where \"$token_evtx_view$\"=\"eventid\"\n     | table event.id\n     | append [| makeresults | eval event.id=\"*\" | where \"$token_evtx_view$\"=\"channel\" | table event.id]]\n| eval eid = 'event.id'\n| eval group_key = case(\n    \"$token_evtx_view$\"=\"eventid\", eid,\n    1=1, source)\n| eval label = case(\n    \"$token_evtx_view$\"=\"channel\", source,\n    eid=\"4688\", \"4688 — Process Creation + CmdLine\",\n    eid=\"4697\", \"4697 — Service Installed\",\n    eid=\"4698\", \"4698 — Scheduled Task Created\",\n    eid=\"4657\", \"4657 — Registry Value Modified\",\n    eid=\"4663\", \"4663 — Object Access Attempt\",\n    eid=\"5140\", \"5140 — Network Share Accessed\",\n    eid=\"1\", \"1 — Sysmon Process Create\",\n    eid=\"3\", \"3 — Sysmon Network Connection\",\n    eid=\"10\", \"10 — Sysmon Process Access\",\n    eid=\"11\", \"11 — Sysmon File Create\",\n    eid=\"13\", \"13 — Sysmon Registry Value Set\",\n    eid=\"22\", \"22 — Sysmon DNS Query\",\n    eid=\"4104\", \"4104 — PowerShell Script Block\",\n    1=1, group_key)\n| stats count min(_time) AS earliest max(_time) AS latest by index, host, group_key, label\n| eval earliest_time = strftime(earliest, \"%Y-%m-%d %H:%M:%S\"),\n       latest_time = strftime(latest, \"%Y-%m-%d %H:%M:%S\"),\n       span_days = round((latest - earliest) / 86400, 1)\n| sort index host - count\n| rename host as Endpoint, label as Channel, count as Events, span_days as \"Retention (days)\", earliest_time as \"Earliest Event\", latest_time as \"Latest Event\"\n| table index Endpoint Channel Events \"Earliest Event\" \"Latest Event\" \"Retention (days)\"",
+				"queryParameters": {
+					"earliest": "0",
+					"latest": ""
+				}
+			},
+			"type": "ds.search"
+		}
+	},
+	"layout": {
+		"globalInputs": [
+			"input_global_trp",
+			"input_dBmmkZww",
+			"input_y9HsgiuH"
+		],
+		"layoutDefinitions": {
+			"layout_IJ281B2h": {
+				"options": {},
+				"structure": [
+					{
+						"item": "viz_sMsVfgpM",
+						"position": {
+							"h": 366,
+							"w": 1200,
+							"x": 0,
+							"y": 0
+						},
+						"type": "block"
+					},
+					{
+						"item": "viz_VbWOw6b0",
+						"position": {
+							"h": 483,
+							"w": 1200,
+							"x": 0,
+							"y": 366
+						},
+						"type": "block"
+					},
+					{
+						"item": "viz_mEmmNvx4",
+						"position": {
+							"h": 574,
+							"w": 1200,
+							"x": 0,
+							"y": 849
+						},
+						"type": "block"
+					}
+				],
+				"type": "grid"
+			},
+			"layout_KciSp5Th": {
+				"structure": [
+					{
+						"item": "viz_tY8EfUzN",
+						"position": {
+							"h": 603,
+							"w": 1200,
+							"x": 0,
+							"y": 0
+						},
+						"type": "block"
+					},
+					{
+						"item": "viz_cJ7G5OID",
+						"position": {
+							"h": 466,
+							"w": 1200,
+							"x": 0,
+							"y": 603
+						},
+						"type": "block"
+					},
+					{
+						"item": "viz_mMhbGCsF",
+						"position": {
+							"h": 226,
+							"w": 1200,
+							"x": 0,
+							"y": 1069
+						},
+						"type": "block"
+					},
+					{
+						"item": "viz_N9Yrobip",
+						"position": {
+							"h": 273,
+							"w": 1200,
+							"x": 0,
+							"y": 1295
+						},
+						"type": "block"
+					},
+					{
+						"item": "viz_OezMAZur",
+						"position": {
+							"h": 103,
+							"w": 1200,
+							"x": 0,
+							"y": 1568
+						},
+						"type": "block"
+					},
+					{
+						"item": "viz_hOqT6sle",
+						"position": {
+							"h": 554,
+							"w": 1200,
+							"x": 0,
+							"y": 1671
+						},
+						"type": "block"
+					},
+					{
+						"item": "viz_b1xfWx3F",
+						"position": {
+							"h": 547,
+							"w": 1200,
+							"x": 0,
+							"y": 2225
+						},
+						"type": "block"
+					}
+				],
+				"type": "grid"
+			},
+			"layout_VwGk1nKB": {
+				"structure": [
+					{
+						"item": "viz_9R2TsBHt",
+						"position": {
+							"h": 869,
+							"w": 554,
+							"x": 0,
+							"y": 0
+						},
+						"type": "block"
+					},
+					{
+						"item": "viz_I4ebnetx",
+						"position": {
+							"h": 300,
+							"w": 646,
+							"x": 554,
+							"y": 569
+						},
+						"type": "block"
+					},
+					{
+						"item": "input_0et60Zgz",
+						"position": {
+							"h": 90,
+							"w": 646,
+							"x": 554,
+							"y": 0
+						},
+						"type": "input"
+					},
+					{
+						"item": "viz_cuQkTftH",
+						"position": {
+							"h": 389,
+							"w": 646,
+							"x": 554,
+							"y": 90
+						},
+						"type": "block"
+					},
+					{
+						"item": "input_UnEH8TIc",
+						"position": {
+							"h": 90,
+							"w": 646,
+							"x": 554,
+							"y": 479
+						},
+						"type": "input"
+					}
+				],
+				"type": "grid"
+			}
+		},
+		"options": {},
+		"tabs": {
+			"items": [
+				{
+					"label": "Data sources",
+					"layoutId": "layout_VwGk1nKB"
+				},
+				{
+					"label": "Assets",
+					"layoutId": "layout_KciSp5Th"
+				},
+				{
+					"label": "Users",
+					"layoutId": "layout_IJ281B2h"
+				}
+			]
+		}
+	},
+	"applicationProperties": {
+		"collapseNavigation": false,
+		"downsampleVisualizations": true
+	}
+}
+    ]]></definition>
+    <meta type="hiddenElements"><![CDATA[
+{
+	"hideEdit": false,
+	"hideOpenInSearch": false,
+	"hideExport": false
+}
+    ]]></meta>
+</dashboard>

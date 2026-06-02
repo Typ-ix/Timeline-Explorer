@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<view template="pages/search.html" type="html" isDashboard="False">
+    <label>Search</label>
+    <module name="AccountBar" layoutPanel="appHeader"/>
+    <module name="AppBar" layoutPanel="navigationHeader"/>
+    <module name="Message" layoutPanel="messaging">
+      <param name="filter">*</param>
+      <param name="clearOnJobDispatch">False</param>
+      <param name="maxSize">1</param>
+    </module>
+
+    <module name="JavascriptFiles" layoutPanel="appHeader">
+      <param name="filenames">Timeline-Explorer:custom</param>
+    </module>
+</view>

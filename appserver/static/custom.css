@@ -1,0 +1,21 @@
+#custom-toolbar {
+    padding: 8px 12px;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    display: flex;
+    gap: 8px;
+}
+
+.custom-btn {
+    background: #2b6ca8;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.custom-btn:hover {
+    background: #1e4f7a;
+}
