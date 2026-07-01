@@ -20,7 +20,7 @@ CSS_FILES=(
 # Create the JS patch
 PATCH_JS=$(mktemp /tmp/patch_XXXXXX.js)
 cat > "$PATCH_JS" << 'EOF'
-# PATCHED v1.0.0
+// PATCHED v1.0.0
 let autoExpandPropertyName = 'jsonAutoExpand';
 let autoExpandSetting = localStorage.getItem(autoExpandPropertyName);
 let observer2Added = false;
